@@ -204,6 +204,65 @@ body.quake .wrap{animation:quake .5s}
 @keyframes quake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-7px,3px)}40%,60%{transform:translate(7px,-3px)}}
 footer{color:#7d878e}
 @media (prefers-reduced-motion: reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* ── Mørkt tema: gunmetal, sort, oliven og marineblå med blodrød og rav ── */
+:root{--ink:#e3e8eb;--paper:#1b2025;--paper2:#232a30;--teal:#55703a;--wine:#b3261e;--red:#d83a2c;--gold:#e0a526;--green:#5f8f3e;--steel:#8b949b;--line:#3a434a;--navy:#162230}
+body{color:var(--ink)}
+.panel{background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 30%),repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),linear-gradient(#20262c,#15191d);border:1px solid #000;color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.8),0 0 0 1px #2c3338,inset 0 1px 0 rgba(255,255,255,.06)}
+h1,h2,h3{color:#f1f4f6}
+.eyebrow{color:var(--gold)}
+.hint,.small{color:#9aa5ad}
+.notice{background:#2a2414;border-left-color:var(--gold);color:#f0dfb4}
+.notice.error{background:#2c1513;border-left-color:var(--red);color:#f5c9c2}
+.notice.success{background:#16261a;border-left-color:var(--green);color:#cfe6c0}
+.board .notice{color:#f0dfb4!important}
+button{background:linear-gradient(#66717a,#353d44);color:#f1f3f4;border:1px solid #0b0d0e;box-shadow:0 3px #0b0d0e,inset 0 1px 0 rgba(255,255,255,.18);text-shadow:0 1px 0 #000}
+button.secondary{background:linear-gradient(#3d464d,#252b30);color:#dfe4e7;box-shadow:0 3px #0b0d0e,inset 0 1px 0 rgba(255,255,255,.1)}
+button:active{box-shadow:0 1px #0b0d0e}
+input,textarea,select{background:#0f1316;color:#e6eaec;border:1px solid #3d464d}
+input::placeholder,textarea::placeholder{color:#6b757c}
+textarea{background:repeating-linear-gradient(#0f1316 0 29px,#1f2a33 29px 30px)}
+label{color:#c9d0d6}
+summary{color:#e3e8eb}
+.dossier{background:#12161a;border:1px dashed #3d464d;color:#d6dce0}
+.dossier b{color:var(--gold)}
+.brief{border-left-color:var(--red);color:#e3e8eb}
+nav button{background:linear-gradient(#3d464d,#252b30)}
+nav .active{background:linear-gradient(#6b8a45,#3d5226);color:#f4f7ef;box-shadow:0 3px #1d2812}
+.evidence{background:linear-gradient(#232a30,#1c2227);border:1px solid #353d44;box-shadow:3px 5px 0 rgba(0,0,0,.45);color:#dfe4e7}
+.evidence:before{color:#7f8a92}
+.evidence.central{border-left:6px solid var(--teal);background:linear-gradient(90deg,rgba(85,112,58,.12),transparent 40%),linear-gradient(#232a30,#1c2227)}
+.evidence.field{border-left:6px solid var(--red)}
+.src{color:#9aa5ad;border-bottom-color:#3d464d}
+.sec-title{color:#f1f4f6}.sec-title:after{background:#3d464d}
+.card{background:linear-gradient(#2b3238,#1c2126);border-color:#3d464d;color:#dfe4e7;box-shadow:0 8px 18px rgba(0,0,0,.5)}
+.card:before{background:#2b3238;border-color:#3d464d}
+.card.done{background:linear-gradient(#2c3a22,#1b2415)}.card.done:before{background:#2c3a22}
+.card .victim{color:#aab4bb}
+.cardstamp{color:#7fc455;border-color:#7fc455;mix-blend-mode:normal}
+.file{background:linear-gradient(#232a30,#1c2227);border-color:#353d44;box-shadow:2px 4px 0 rgba(0,0,0,.4);color:#dfe4e7}
+.timeline{border-left-color:#4a535a}
+.tl b{color:var(--gold)}
+.tl:before{background:var(--red);box-shadow:0 0 0 4px #1b2025}
+.accuse{background:#1c2227;border-color:#353d44;box-shadow:inset 0 0 40px rgba(0,0,0,.4)}
+.chip{background:linear-gradient(#3a434a,#272d32);color:#e3e8eb;box-shadow:0 2px #0b0d0e}
+.chip.struck{background:#16191c;color:#68727a}
+.chip.sel{background:linear-gradient(#6b8a45,#3d5226);color:#f4f7ef;border-color:#1d2812;box-shadow:0 3px #1d2812}
+.auto{background:var(--teal)}
+.solution{background:#16261a;border-color:#2f4a24;border-left-color:var(--green);color:#dfe8d6}
+.board button.opt{background:linear-gradient(#3a434a,#2a3036);color:#eef1f3;box-shadow:0 2px #0b0d0e}
+.opt.struck{background:#15181b!important;color:#5f6970}
+.board .hint{color:#9aa5ad}
+.ready{border-color:var(--gold);color:#ffd36b}
+.locked{background:repeating-linear-gradient(45deg,rgba(224,165,38,.06) 0 12px,transparent 12px 24px),#15191c;border-color:#5a5030;color:#c9d0d6}
+.box{background:linear-gradient(#232a30,#1c2227);border-color:#353d44}
+.xstamp{background:rgba(0,0,0,.4)}
+#toast{background:#15191c;color:#f1f3f4;border:2px solid var(--gold)}
+.lamp{background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(190,215,255,.10),transparent 70%)}
+.rolepick .chip .small{color:inherit;opacity:.85;font:14px/1.45 Georgia,serif}
+@media(max-width:1000px){.rolepick{grid-template-columns:1fr}}
+.newspaper h2,.newspaper .mast,.newspaper h3{color:#14110e}.newspaper .small{color:#3a332b}.newspaper{color:#1d1a17}
+.vignette{box-shadow:inset 0 0 200px 60px rgba(0,0,0,.85)}
 </style><body><canvas id="fx"></canvas><div class="lamp"></div><div class="vignette"></div><div id="flash"></div><div class="smoke"></div><div class="beam"></div><div class="grain"></div><div class="siren" id="siren"></div><div class="wrap"><header><div><div class="brand" data-text="KRIMINALKLUDDER">KRIMINALKLUDDER</div><div class="sub">Detektivspillet · Co-Op</div><div class="small tagline" id="tagline"></div></div><div class="badges"><span class="badge hidden" id="role"></span><span class="badge" id="status"></span></div></header><main id="app"></main><footer>Detektivspillet CoOp · Kriminalkludder · To iPads, ét makkerpar.<br>Den ene er Feltagent, den anden Centralen. Hver iPad viser kun sine egne spor; tavlen og anklagen er fælles.<br>Telefoner, computere, optagelser og overvågningsvideo. Server: Supabase.<br>Kan også spilles alene på én enhed.</footer></div><div id="toast" class="hidden" role="status"></div><input id="import" type="file" accept=".json,application/json" hidden><script src="spor.js"></script>
 <script src="cases/pakke-01.js"></script>
 <script>
