@@ -297,14 +297,14 @@ const KEY='kriminalkludder-solo-v1',CAT=['Mistænkte','Mordvåben','Gerningssted
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // ── Supabase (valgfri). Udfyld projektets URL og den offentlige anon-nøgle for at slå online-gemning og rangliste til.
 // Tomme felter = spillet kører helt offline som før. Databasen sættes op med supabase-setup.sql.
-const SUPA={url:'',key:''};
+const SUPA={url:'https://ndluvdtnxwsewxtqyolv.supabase.co',key:'sb_publishable_ssQGNst4FqEPMDn2X3Yp6w_2_ag7u25'};
 const CODEKEY='kriminalkludder-kode',UUIDRE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const online=()=>!!(SUPA.url&&SUPA.key);
 let cloudTimer,cloudState='',ranking=null,myCode;
 function uuid(){if(crypto.randomUUID)return crypto.randomUUID();const b=crypto.getRandomValues(new Uint8Array(16));b[6]=b[6]&15|64;b[8]=b[8]&63|128;const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join('');return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);}
 try{myCode=localStorage.getItem(CODEKEY);}catch(e){}
 if(!myCode||!UUIDRE.test(myCode)){myCode=uuid();try{localStorage.setItem(CODEKEY,myCode);}catch(e){}}
-async function rpc(fn,args){const r=await fetch(SUPA.url.replace(/\/$/,'')+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.key,Authorization:'Bearer '+SUPA.key,'Content-Type':'application/json'},body:JSON.stringify(args)});if(!r.ok)throw Error('Supabase svarede '+r.status);const t=await r.text();return t?JSON.parse(t):null;}
+async function rpc(fn,args){const r=await fetch(SUPA.url.replace(/\/$/,'')+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.key,'Content-Type':'application/json'},body:JSON.stringify(args)});if(!r.ok)throw Error('Supabase svarede '+r.status);const t=await r.text();return t?JSON.parse(t):null;}
 function setCloud(s){cloudState=s;const el=document.getElementById('cloudState');if(el)el.textContent=s;}
 function cloudQueue(){if(!online())return;clearTimeout(cloudTimer);setCloud('Gemmer …');cloudTimer=setTimeout(cloudPush,1500);}
 async function cloudPush(){try{await rpc('detektiv_save',{p_code:myCode,p_name:game.name,p_data:{...game,current:null}});setCloud('Gemt online kl. '+new Date().toLocaleTimeString('da-DK',{hour:'2-digit',minute:'2-digit'}));loadRanking();}catch(e){setCloud('Ingen forbindelse – gemt lokalt');}}
