@@ -622,7 +622,14 @@ function tick(){ctx.clearRect(0,0,W,H);ctx.lineWidth=D;for(const d of drops){ctx
 size();addEventListener('resize',size);if(!RM){tick();(function bolt(){setTimeout(()=>{const f=$('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');bolt();},18000+Math.random()*30000);})();}
 const line='To detektiver. Én skyldig. Ingen nåde.';const el=$('tagline');if(RM)el.textContent=line;else{let i=0;(function step(){el.textContent=line.slice(0,++i);if(i<line.length)setTimeout(step,45+Math.random()*60);})();}})();
 // Opstart
-if(me&&me.mode==='solo'){game=loadSolo();checkVerdict();draw();cloudBoot();}
+function boot(){if(me&&me.mode==='solo'){game=loadSolo();checkVerdict();draw();cloudBoot();}
 else if(coop()){draw();loop();}
-else draw();
+else draw();}
+// ── Adgangskode til hjemmesiden. Kun en SHA-256-fingeraftryk af koden står her.
+// Det er en lås mod tilfældige besøgende, ikke rigtig sikkerhed: koden kan læses på GitHub.
+const GATE='51bf458c7c2cf1ceb30ae057cfe9ec8cd2cf1eec87da3c7a13aeced969031011',GATEKEY='kriminalkludder-adgang';
+async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+function gate(){$('status').textContent='Låst';$('app').innerHTML=`<section class="panel gate"><div class="eyebrow">Kriminalkludder · Adgang kun for detektiver</div><h1>Adgang nægtet.</h1><p>Indtast hovedadgangskoden for at åbne sagsarkivet. Koden huskes på denne iPad.</p><form id="gateForm"><label for="gatePw">Adgangskode</label><input id="gatePw" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false"><div class="actions"><button class="big">Lås op</button></div></form><p id="gateErr" class="notice error hidden" role="alert">Forkert adgangskode.</p></section>`;
+$('gatePw').focus();$('gateForm').onsubmit=async e=>{e.preventDefault();let ok=false;try{ok=await sha($('gatePw').value)===GATE;}catch(err){}if(ok){lsSet(GATEKEY,GATE);boot();}else{$('gateErr').classList.remove('hidden');$('gatePw').value='';const p=document.querySelector('.gate');p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake');}};}
+if(lsGet(GATEKEY)===GATE)boot();else gate();
 </script></body></html>
