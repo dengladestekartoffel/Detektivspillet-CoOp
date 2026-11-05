@@ -1,4 +1,4 @@
-<!doctype html><html lang="da"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Detektivspillet CoOp</title><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0d1012"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Special+Elite&display=swap" rel="stylesheet"><style>
+<!doctype html><html lang="da"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Detektivspillet</title><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#0d1012"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Special+Elite&display=swap" rel="stylesheet"><script>(function(){var t;try{t=localStorage.getItem("detektivspillet-tema")}catch(e){}if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.setAttribute("data-theme",t);})();</script><style>
 :root{--ink:#2b2420;--paper:#efe3c8;--paper2:#fbf3df;--teal:#2f5759;--wine:#7e3b52;--red:#a3231b;--gold:#c99a4a;--green:#2f6b45}
 *{box-sizing:border-box}
 html{background:#15191b}
@@ -206,64 +206,82 @@ footer{color:#7d878e}
 @media (prefers-reduced-motion: reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 
 /* ── Mørkt tema: gunmetal, sort, oliven og marineblå med blodrød og rav ── */
-:root{--ink:#e3e8eb;--paper:#1b2025;--paper2:#232a30;--teal:#55703a;--wine:#b3261e;--red:#d83a2c;--gold:#e0a526;--green:#5f8f3e;--steel:#8b949b;--line:#3a434a;--navy:#162230}
-body{color:var(--ink)}
-.panel{background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 30%),repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),linear-gradient(#20262c,#15191d);border:1px solid #000;color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.8),0 0 0 1px #2c3338,inset 0 1px 0 rgba(255,255,255,.06)}
-h1,h2,h3{color:#f1f4f6}
-.eyebrow{color:var(--gold)}
-.hint,.small{color:#9aa5ad}
-.notice{background:#2a2414;border-left-color:var(--gold);color:#f0dfb4}
-.notice.error{background:#2c1513;border-left-color:var(--red);color:#f5c9c2}
-.notice.success{background:#16261a;border-left-color:var(--green);color:#cfe6c0}
-.board .notice{color:#f0dfb4!important}
-button{background:linear-gradient(#66717a,#353d44);color:#f1f3f4;border:1px solid #0b0d0e;box-shadow:0 3px #0b0d0e,inset 0 1px 0 rgba(255,255,255,.18);text-shadow:0 1px 0 #000}
-button.secondary{background:linear-gradient(#3d464d,#252b30);color:#dfe4e7;box-shadow:0 3px #0b0d0e,inset 0 1px 0 rgba(255,255,255,.1)}
-button:active{box-shadow:0 1px #0b0d0e}
-input,textarea,select{background:#0f1316;color:#e6eaec;border:1px solid #3d464d}
-input::placeholder,textarea::placeholder{color:#6b757c}
-textarea{background:repeating-linear-gradient(#0f1316 0 29px,#1f2a33 29px 30px)}
-label{color:#c9d0d6}
-summary{color:#e3e8eb}
-.dossier{background:#12161a;border:1px dashed #3d464d;color:#d6dce0}
-.dossier b{color:var(--gold)}
-.brief{border-left-color:var(--red);color:#e3e8eb}
-nav button{background:linear-gradient(#3d464d,#252b30)}
-nav .active{background:linear-gradient(#6b8a45,#3d5226);color:#f4f7ef;box-shadow:0 3px #1d2812}
-.evidence{background:linear-gradient(#232a30,#1c2227);border:1px solid #353d44;box-shadow:3px 5px 0 rgba(0,0,0,.45);color:#dfe4e7}
-.evidence:before{color:#7f8a92}
-.evidence.central{border-left:6px solid var(--teal);background:linear-gradient(90deg,rgba(85,112,58,.12),transparent 40%),linear-gradient(#232a30,#1c2227)}
-.evidence.field{border-left:6px solid var(--red)}
-.src{color:#9aa5ad;border-bottom-color:#3d464d}
-.sec-title{color:#f1f4f6}.sec-title:after{background:#3d464d}
-.card{background:linear-gradient(#2b3238,#1c2126);border-color:#3d464d;color:#dfe4e7;box-shadow:0 8px 18px rgba(0,0,0,.5)}
-.card:before{background:#2b3238;border-color:#3d464d}
-.card.done{background:linear-gradient(#2c3a22,#1b2415)}.card.done:before{background:#2c3a22}
-.card .victim{color:#aab4bb}
-.cardstamp{color:#7fc455;border-color:#7fc455;mix-blend-mode:normal}
-.file{background:linear-gradient(#232a30,#1c2227);border-color:#353d44;box-shadow:2px 4px 0 rgba(0,0,0,.4);color:#dfe4e7}
-.timeline{border-left-color:#4a535a}
-.tl b{color:var(--gold)}
-.tl:before{background:var(--red);box-shadow:0 0 0 4px #1b2025}
-.accuse{background:#1c2227;border-color:#353d44;box-shadow:inset 0 0 40px rgba(0,0,0,.4)}
-.chip{background:linear-gradient(#3a434a,#272d32);color:#e3e8eb;box-shadow:0 2px #0b0d0e}
-.chip.struck{background:#16191c;color:#68727a}
-.chip.sel{background:linear-gradient(#6b8a45,#3d5226);color:#f4f7ef;border-color:#1d2812;box-shadow:0 3px #1d2812}
-.auto{background:var(--teal)}
-.solution{background:#16261a;border-color:#2f4a24;border-left-color:var(--green);color:#dfe8d6}
-.board button.opt{background:linear-gradient(#3a434a,#2a3036);color:#eef1f3;box-shadow:0 2px #0b0d0e}
-.opt.struck{background:#15181b!important;color:#5f6970}
-.board .hint{color:#9aa5ad}
-.ready{border-color:var(--gold);color:#ffd36b}
-.locked{background:repeating-linear-gradient(45deg,rgba(224,165,38,.06) 0 12px,transparent 12px 24px),#15191c;border-color:#5a5030;color:#c9d0d6}
-.box{background:linear-gradient(#232a30,#1c2227);border-color:#353d44}
-.xstamp{background:rgba(0,0,0,.4)}
-#toast{background:#15191c;color:#f1f3f4;border:2px solid var(--gold)}
-.lamp{background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(190,215,255,.10),transparent 70%)}
+:root[data-theme="dark"]{--ink:#e3e8eb;--paper:#1b2025;--paper2:#232a30;--teal:#55703a;--wine:#b3261e;--red:#d83a2c;--gold:#e0a526;--green:#5f8f3e;--steel:#8b949b;--line:#3a434a;--navy:#162230}
+:root[data-theme="dark"] body{color:var(--ink)}
+:root[data-theme="dark"] .panel{background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 30%),repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 1px,transparent 1px 4px),linear-gradient(#20262c,#15191d);border:1px solid #000;color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.8),0 0 0 1px #2c3338,inset 0 1px 0 rgba(255,255,255,.06)}
+:root[data-theme="dark"] h1,:root[data-theme="dark"] h2,:root[data-theme="dark"] h3{color:#f1f4f6}
+:root[data-theme="dark"] .eyebrow{color:var(--gold)}
+:root[data-theme="dark"] .hint,:root[data-theme="dark"] .small{color:#9aa5ad}
+:root[data-theme="dark"] .notice{background:#2a2414;border-left-color:var(--gold);color:#f0dfb4}
+:root[data-theme="dark"] .notice.error{background:#2c1513;border-left-color:var(--red);color:#f5c9c2}
+:root[data-theme="dark"] .notice.success{background:#16261a;border-left-color:var(--green);color:#cfe6c0}
+:root[data-theme="dark"] .board .notice{color:#f0dfb4!important}
+:root[data-theme="dark"] button{background:linear-gradient(#66717a,#353d44);color:#f1f3f4;border:1px solid #0b0d0e;box-shadow:0 3px #0b0d0e,inset 0 1px 0 rgba(255,255,255,.18);text-shadow:0 1px 0 #000}
+:root[data-theme="dark"] button.secondary{background:linear-gradient(#3d464d,#252b30);color:#dfe4e7;box-shadow:0 3px #0b0d0e,inset 0 1px 0 rgba(255,255,255,.1)}
+:root[data-theme="dark"] button:active{box-shadow:0 1px #0b0d0e}
+:root[data-theme="dark"] input,:root[data-theme="dark"] textarea,:root[data-theme="dark"] select{background:#0f1316;color:#e6eaec;border:1px solid #3d464d}
+:root[data-theme="dark"] input::placeholder,:root[data-theme="dark"] textarea::placeholder{color:#6b757c}
+:root[data-theme="dark"] textarea{background:repeating-linear-gradient(#0f1316 0 29px,#1f2a33 29px 30px)}
+:root[data-theme="dark"] label{color:#c9d0d6}
+:root[data-theme="dark"] summary{color:#e3e8eb}
+:root[data-theme="dark"] .dossier{background:#12161a;border:1px dashed #3d464d;color:#d6dce0}
+:root[data-theme="dark"] .dossier b{color:var(--gold)}
+:root[data-theme="dark"] .brief{border-left-color:var(--red);color:#e3e8eb}
+:root[data-theme="dark"] nav button{background:linear-gradient(#3d464d,#252b30)}
+:root[data-theme="dark"] nav .active{background:linear-gradient(#6b8a45,#3d5226);color:#f4f7ef;box-shadow:0 3px #1d2812}
+:root[data-theme="dark"] .evidence{background:linear-gradient(#232a30,#1c2227);border:1px solid #353d44;box-shadow:3px 5px 0 rgba(0,0,0,.45);color:#dfe4e7}
+:root[data-theme="dark"] .evidence:before{color:#7f8a92}
+:root[data-theme="dark"] .evidence.central{border-left:6px solid var(--teal);background:linear-gradient(90deg,rgba(85,112,58,.12),transparent 40%),linear-gradient(#232a30,#1c2227)}
+:root[data-theme="dark"] .evidence.field{border-left:6px solid var(--red)}
+:root[data-theme="dark"] .src{color:#9aa5ad;border-bottom-color:#3d464d}
+:root[data-theme="dark"] .sec-title{color:#f1f4f6}:root[data-theme="dark"] .sec-title:after{background:#3d464d}
+:root[data-theme="dark"] .card{background:linear-gradient(#2b3238,#1c2126);border-color:#3d464d;color:#dfe4e7;box-shadow:0 8px 18px rgba(0,0,0,.5)}
+:root[data-theme="dark"] .card:before{background:#2b3238;border-color:#3d464d}
+:root[data-theme="dark"] .card.done{background:linear-gradient(#2c3a22,#1b2415)}:root[data-theme="dark"] .card.done:before{background:#2c3a22}
+:root[data-theme="dark"] .card .victim{color:#aab4bb}
+:root[data-theme="dark"] .cardstamp{color:#7fc455;border-color:#7fc455;mix-blend-mode:normal}
+:root[data-theme="dark"] .file{background:linear-gradient(#232a30,#1c2227);border-color:#353d44;box-shadow:2px 4px 0 rgba(0,0,0,.4);color:#dfe4e7}
+:root[data-theme="dark"] .timeline{border-left-color:#4a535a}
+:root[data-theme="dark"] .tl b{color:var(--gold)}
+:root[data-theme="dark"] .tl:before{background:var(--red);box-shadow:0 0 0 4px #1b2025}
+:root[data-theme="dark"] .accuse{background:#1c2227;border-color:#353d44;box-shadow:inset 0 0 40px rgba(0,0,0,.4)}
+:root[data-theme="dark"] .chip{background:linear-gradient(#3a434a,#272d32);color:#e3e8eb;box-shadow:0 2px #0b0d0e}
+:root[data-theme="dark"] .chip.struck{background:#16191c;color:#68727a}
+:root[data-theme="dark"] .chip.sel{background:linear-gradient(#6b8a45,#3d5226);color:#f4f7ef;border-color:#1d2812;box-shadow:0 3px #1d2812}
+:root[data-theme="dark"] .auto{background:var(--teal)}
+:root[data-theme="dark"] .solution{background:#16261a;border-color:#2f4a24;border-left-color:var(--green);color:#dfe8d6}
+:root[data-theme="dark"] .board button.opt{background:linear-gradient(#3a434a,#2a3036);color:#eef1f3;box-shadow:0 2px #0b0d0e}
+:root[data-theme="dark"] .opt.struck{background:#15181b!important;color:#5f6970}
+:root[data-theme="dark"] .board .hint{color:#9aa5ad}
+:root[data-theme="dark"] .ready{border-color:var(--gold);color:#ffd36b}
+:root[data-theme="dark"] .locked{background:repeating-linear-gradient(45deg,rgba(224,165,38,.06) 0 12px,transparent 12px 24px),#15191c;border-color:#5a5030;color:#c9d0d6}
+:root[data-theme="dark"] .box{background:linear-gradient(#232a30,#1c2227);border-color:#353d44}
+:root[data-theme="dark"] .xstamp{background:rgba(0,0,0,.4)}
+:root[data-theme="dark"] #toast{background:#15191c;color:#f1f3f4;border:2px solid var(--gold)}
+:root[data-theme="dark"] .lamp{background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(190,215,255,.10),transparent 70%)}
+:root[data-theme="dark"] .vignette{box-shadow:inset 0 0 200px 60px rgba(0,0,0,.85)}
+
 .rolepick .chip .small{color:inherit;opacity:.85;font:14px/1.45 Georgia,serif}
 @media(max-width:1000px){.rolepick{grid-template-columns:1fr}}
 .newspaper h2,.newspaper .mast,.newspaper h3{color:#14110e}.newspaper .small{color:#3a332b}.newspaper{color:#1d1a17}
-.vignette{box-shadow:inset 0 0 200px 60px rgba(0,0,0,.85)}
-</style><body><canvas id="fx"></canvas><div class="lamp"></div><div class="vignette"></div><div id="flash"></div><div class="smoke"></div><div class="beam"></div><div class="grain"></div><div class="siren" id="siren"></div><div class="wrap"><header><div><div class="brand" data-text="KRIMINALKLUDDER">KRIMINALKLUDDER</div><div class="sub">Detektivspillet · Co-Op</div><div class="small tagline" id="tagline"></div></div><div class="badges"><span class="badge hidden" id="role"></span><span class="badge" id="status"></span></div></header><main id="app"></main><footer>Detektivspillet CoOp · Kriminalkludder · To iPads, ét makkerpar.<br>Den ene er Feltagent, den anden Centralen. Hver iPad viser kun sine egne spor; tavlen og anklagen er fælles.<br>Telefoner, computere, optagelser og overvågningsvideo. Server: Supabase.<br>Kan også spilles alene på én enhed.</footer></div><div id="toast" class="hidden" role="status"></div><input id="import" type="file" accept=".json,application/json" hidden><script src="spor.js"></script>
+
+/* ── Lyst tema: papir og lys arkivgrå. Rødt og blåt fra mørkt tema bevares som accenter. ── */
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+:root[data-theme="light"] html,:root[data-theme="light"]{background:#d9d3c4}
+:root[data-theme="light"] body{background:radial-gradient(ellipse at 50% -10%,#f6f1e4 0%,#e4dccb 50%,#cfc6b2 100%) fixed;color:var(--ink)}
+:root[data-theme="light"] .brand{background:linear-gradient(180deg,#5a636b 0%,#2a3036 45%,#0f1215 52%,#3a4249 75%,#6b747b 100%);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 6px rgba(255,80,60,.25)) drop-shadow(1px 2px 0 rgba(255,255,255,.6))}
+:root[data-theme="light"] .sub{color:#a3231b;text-shadow:none}
+:root[data-theme="light"] .tagline{color:#3a332b}
+:root[data-theme="light"] footer{color:#5a5248}
+:root[data-theme="light"] .grain{opacity:.06;mix-blend-mode:multiply}
+:root[data-theme="light"] .vignette{box-shadow:inset 0 0 160px 30px rgba(80,60,30,.25)}
+:root[data-theme="light"] .smoke{opacity:.5}
+:root[data-theme="light"] .beam{opacity:.35;mix-blend-mode:multiply}
+:root[data-theme="light"] .lamp{background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(255,230,170,.35),transparent 70%)}
+.themebtn{min-height:0;padding:5px 11px;border-radius:5px;font:14px monospace;background:linear-gradient(#2c3236,#15191b);color:#e6ecef;border:1px solid #59636b;box-shadow:none;text-shadow:none}
+:root[data-theme="light"] .themebtn{background:linear-gradient(#fbf6ea,#e4dac2);color:#2b2420;border-color:#a99a7c}
+</style><body><canvas id="fx"></canvas><div class="lamp"></div><div class="vignette"></div><div id="flash"></div><div class="smoke"></div><div class="beam"></div><div class="grain"></div><div class="siren" id="siren"></div><div class="wrap"><header><div><div class="brand" data-text="DETEKTIVSPILLET">DETEKTIVSPILLET</div><div class="sub">Co-op · To iPads</div><div class="small tagline" id="tagline"></div></div><div class="badges"><button id="themeBtn" class="themebtn" type="button"></button><span class="badge hidden" id="role"></span><span class="badge" id="status"></span></div></header><main id="app"></main><footer>Detektivspillet · To iPads, ét makkerpar.<br>Den ene er Feltagent, den anden Centralen. Hver iPad viser kun sine egne spor; tavlen og anklagen er fælles.<br>Telefoner, computere, optagelser og overvågningsvideo. Server: Supabase.<br>Kan også spilles alene på én enhed.</footer></div><div id="toast" class="hidden" role="status"></div><input id="import" type="file" accept=".json,application/json" hidden><script src="spor.js"></script>
 <script src="cases/pakke-01.js"></script>
 <script src="cases/pakke-02.js"></script>
 <script src="cases/pakke-03.js"></script>
@@ -599,7 +617,7 @@ function nextOpen(){for(let k=1;k<=CASES.length;k++){const i=((game.current??-1)
 
 // ── Startskærm: opret makkerpar, deltag med kode eller spil alene.
 let lobbyRole='felt';
-function lobby(){const name=lsGet('kriminalkludder-navn')||'';$('app').innerHTML=`<section class="panel"><div class="eyebrow">Kriminalkludder · To iPads · Ét makkerpar</div><h1>To detektiver.<br>Halvdelen af beviserne hver.</h1><p>${CASES.length} sagsmapper ligger på bordet. Den ene af jer er ude i felten, den anden sidder ved radioen på centralen. Hver iPad viser kun sine egne beviser, så I bliver nødt til at tale sammen. Udelukkelsestavlen og anklagen deler I.</p>
+function lobby(){const name=lsGet('kriminalkludder-navn')||'';$('app').innerHTML=`<section class="panel"><div class="eyebrow">Detektivspillet · To iPads · Ét makkerpar</div><h1>To detektiver.<br>Halvdelen af beviserne hver.</h1><p>${CASES.length} sagsmapper ligger på bordet. Den ene af jer er ude i felten, den anden sidder ved radioen på centralen. Hver iPad viser kun sine egne beviser, så I bliver nødt til at tale sammen. Udelukkelsestavlen og anklagen deler I.</p>
 ${online()?`<label for="lname">Dit detektivnavn</label><input id="lname" maxlength="35" value="${esc(name)}" placeholder="F.eks. Holm" autocomplete="off">
 <div class="lobby"><div class="box"><div class="eyebrow">iPad nr. 1</div><h3>Opret makkerpar</h3><p class="hint">Vælg din rolle. Du får en kode, som din makker skriver på sin iPad.</p><div class="rolepick">${Object.entries(ROLES).map(([k,r])=>`<button class="chip ${lobbyRole===k?'sel':''}" data-role="${k}"><b>${r.icon} ${r.name}</b><br><span class="small">${esc(r.desc)}</span></button>`).join('')}</div><div class="actions"><button id="create" class="big">Opret og få en kode</button></div></div>
 <div class="box"><div class="eyebrow">iPad nr. 2</div><h3>Deltag med kode</h3><p class="hint">Skriv koden fra din makkers iPad. Du får automatisk den ledige rolle.</p><label for="jcode">Rumkode</label><input id="jcode" class="codein" maxlength="5" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="ABCDE"><div id="jroles"></div><div class="actions"><button id="join" class="big">Deltag</button></div></div></div>`:'<p class="notice">Makkerpar kræver forbindelse til serveren, som ikke er sat op i denne udgave.</p>'}
@@ -615,7 +633,7 @@ if(free.length===1){joinRoom(code,free[0],n,r);return;}
 $('jroles').innerHTML=`<p class="hint">${free.length?'Begge roller er ledige. Hvem er du?':'Begge roller er taget. Vælg den rolle, du vil overtage på denne iPad.'}</p><div class="rolepick">${Object.entries(ROLES).map(([k,x])=>`<button class="chip" data-take="${k}"><b>${x.icon} ${x.name}</b>${p[k]?'<br><span class="small">nu: '+esc(p[k])+'</span>':''}</button>`).join('')}</div>`;document.querySelectorAll('[data-take]').forEach(b=>b.onclick=()=>joinRoom(code,b.dataset.take,n,r));}catch(err){e.target.disabled=false;toast('Kunne ikke kontakte serveren.');}};}
 
 function curPack(){const p=lsGet('kriminalkludder-bunke');return Number.isInteger(p)&&CASES.some((_,i)=>PACK(i)===p)?p:(game&&game.current!==null?PACK(game.current):PACK(nextOpen()??0));}
-function archive(){const all=game.solved.length===CASES.length,we=coop();$('app').innerHTML=`<section class="panel"><div class="eyebrow">Kriminalkludder · Sagsarkiv${we?' · Rum '+esc(me.room):''}</div><h1>${we?'To detektiver.<br>Én fælles hovedpine.':'Én detektiv.<br>Hele hovedpinen.'}</h1><p>${we?CASES.length+' sagsmapper, to iPads og en kold kop kaffe hver. Den, der åbner en sag, åbner den for jer begge.':'Makkeren er sygemeldt. Nu er det dig, '+CASES.length+' sagsmapper og en kold kop kaffe. Regnen slår mod vinduet. Telefonen har ikke ringet i en time.'}</p><label for="name">Dit detektivnavn</label><input id="name" maxlength="35" value="${esc(we?me.name:game.name)}"><p>${game.solved.length} / ${CASES.length} sager opklaret.${all?' Alle sager er lukket. Politimesteren overvejer at give '+(we?'jer':'dig')+' et skilt.':''}</p><div class="packbar"><label for="pack" style="margin:0">Sagsbunke</label><select id="pack">${[...new Set(CASES.map((_,i)=>PACK(i)))].map(p=>{const ids=CASES.map((_,i)=>i).filter(i=>PACK(i)===p),done=ids.filter(i=>game.solved.includes(i)).length;return `<option value="${p}" ${p===curPack()?'selected':''}>${p===0?'Arkivets første sager':'Bunke '+p} · sag ${ids[0]+1}–${ids[ids.length-1]+1} · ${done}/${ids.length} opklaret</option>`;}).join('')}</select></div><div class="cards">${CASES.map((c,i)=>{if(PACK(i)!==curPack())return '';const s=game.solved.includes(i),a=game.attempts[i]||0;return `<article class="card ${s?'done':''}" style="--i:${i}">${s?'<span class="cardstamp">OPKLARET</span>':''}<div class="eyebrow">Sag ${i+1} · ${esc(c.no)}${c.theme?`<span class="theme">${esc(c.theme)}</span>`:''}</div><h3 style="margin:6px 0">${esc(c.title)}</h3><div class="victim">✝ ${esc(c.victim)}<br>⌖ ${esc(c.where)}</div><p>${esc(c.intro)}</p>${s?`<p class="small">Opklaret · ${a} forsøg</p>`:a?`<p class="small">${a} forkerte forsøg indtil nu</p>`:''}<button data-case="${i}" class="${s?'secondary':''}">${s?'Genlæs sagen':a||game.reports[i]||game.struck[i]?'Fortsæt sagen':'Åbn sagen'}</button></article>`;}).join('')}</div>${onlineBox()}<div class="actions">${we?'':'<button id="backup" class="secondary">Gem sikkerhedskopi</button><button id="load" class="secondary">Indlæs sikkerhedskopi</button><button id="reset" class="secondary">Start forfra</button><button id="tocoop" class="secondary">Spil sammen på to iPads</button>'}</div><p class="hint">${we?'Fremskridtet gemmes på serveren under rumkoden. Luk bare appen; med samme kode kan I fortsætte senere.':'Fremskridt gemmes automatisk i denne browser. Sikkerhedskopier fra to-iPad-udgaven kan også indlæses.'}</p></section>`;
+function archive(){const all=game.solved.length===CASES.length,we=coop();$('app').innerHTML=`<section class="panel"><div class="eyebrow">Detektivspillet · Sagsarkiv${we?' · Rum '+esc(me.room):''}</div><h1>${we?'To detektiver.<br>Én fælles hovedpine.':'Én detektiv.<br>Hele hovedpinen.'}</h1><p>${we?CASES.length+' sagsmapper, to iPads og en kold kop kaffe hver. Den, der åbner en sag, åbner den for jer begge.':'Makkeren er sygemeldt. Nu er det dig, '+CASES.length+' sagsmapper og en kold kop kaffe. Regnen slår mod vinduet. Telefonen har ikke ringet i en time.'}</p><label for="name">Dit detektivnavn</label><input id="name" maxlength="35" value="${esc(we?me.name:game.name)}"><p>${game.solved.length} / ${CASES.length} sager opklaret.${all?' Alle sager er lukket. Politimesteren overvejer at give '+(we?'jer':'dig')+' et skilt.':''}</p><div class="packbar"><label for="pack" style="margin:0">Sagsbunke</label><select id="pack">${[...new Set(CASES.map((_,i)=>PACK(i)))].map(p=>{const ids=CASES.map((_,i)=>i).filter(i=>PACK(i)===p),done=ids.filter(i=>game.solved.includes(i)).length;return `<option value="${p}" ${p===curPack()?'selected':''}>${p===0?'Arkivets første sager':'Bunke '+p} · sag ${ids[0]+1}–${ids[ids.length-1]+1} · ${done}/${ids.length} opklaret</option>`;}).join('')}</select></div><div class="cards">${CASES.map((c,i)=>{if(PACK(i)!==curPack())return '';const s=game.solved.includes(i),a=game.attempts[i]||0;return `<article class="card ${s?'done':''}" style="--i:${i}">${s?'<span class="cardstamp">OPKLARET</span>':''}<div class="eyebrow">Sag ${i+1} · ${esc(c.no)}${c.theme?`<span class="theme">${esc(c.theme)}</span>`:''}</div><h3 style="margin:6px 0">${esc(c.title)}</h3><div class="victim">✝ ${esc(c.victim)}<br>⌖ ${esc(c.where)}</div><p>${esc(c.intro)}</p>${s?`<p class="small">Opklaret · ${a} forsøg</p>`:a?`<p class="small">${a} forkerte forsøg indtil nu</p>`:''}<button data-case="${i}" class="${s?'secondary':''}">${s?'Genlæs sagen':a||game.reports[i]||game.struck[i]?'Fortsæt sagen':'Åbn sagen'}</button></article>`;}).join('')}</div>${onlineBox()}<div class="actions">${we?'':'<button id="backup" class="secondary">Gem sikkerhedskopi</button><button id="load" class="secondary">Indlæs sikkerhedskopi</button><button id="reset" class="secondary">Start forfra</button><button id="tocoop" class="secondary">Spil sammen på to iPads</button>'}</div><p class="hint">${we?'Fremskridtet gemmes på serveren under rumkoden. Luk bare appen; med samme kode kan I fortsætte senere.':'Fremskridt gemmes automatisk i denne browser. Sikkerhedskopier fra to-iPad-udgaven kan også indlæses.'}</p></section>`;
 document.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>openCase(+b.dataset.case));$('pack').onchange=()=>{lsSet('kriminalkludder-bunke',+$('pack').value);draw();};
 let nt;$('name').oninput=()=>{const v=$('name').value.trim();if(we){me.name=v||ROLES[me.role].name;lsSet(MEKEY,me);lsSet('kriminalkludder-navn',v);clearTimeout(nt);nt=setTimeout(()=>act({t:'name',role:me.role,name:me.name}),500);}else act({t:'name',name:v||'Detektiv'});};
 if(!we){$('backup').onclick=backup;$('load').onclick=()=>$('import').click();$('reset').onclick=()=>{if(!confirm('Slet alle fremskridt, noter og anklager på denne enhed?'))return;game=fresh();saveSolo();draw();toast('Arkivet er nulstillet.');};$('tocoop').onclick=()=>{me=null;lsSet(MEKEY,null);draw();};}
@@ -635,6 +653,12 @@ function size(){D=Math.min(devicePixelRatio||1,2);W=cv.width=innerWidth*D;H=cv.h
 function tick(){ctx.clearRect(0,0,W,H);ctx.lineWidth=D;for(const d of drops){ctx.strokeStyle='rgba(200,215,228,'+d.a+')';ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-d.l*.2,d.y+d.l);ctx.stroke();d.y+=d.v;d.x-=d.v*.2;if(d.y>H)Object.assign(d,mk(false));}requestAnimationFrame(tick);}
 size();addEventListener('resize',size);if(!RM){tick();(function bolt(){setTimeout(()=>{const f=$('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');bolt();},18000+Math.random()*30000);})();}
 const line='To detektiver. Én skyldig. Ingen nåde.';const el=$('tagline');if(RM)el.textContent=line;else{let i=0;(function step(){el.textContent=line.slice(0,++i);if(i<line.length)setTimeout(step,45+Math.random()*60);})();}})();
+// ── Lyst/mørkt tema. Følger iPad'ens indstilling, indtil man selv vælger.
+const TKEY='detektivspillet-tema';
+function setTheme(th,save){document.documentElement.setAttribute('data-theme',th);if(save)try{localStorage.setItem(TKEY,th);}catch(e){}const b=$('themeBtn');b.textContent=th==='dark'?'☀ Lyst':'☾ Mørkt';b.setAttribute('aria-label',th==='dark'?'Skift til lyst tema':'Skift til mørkt tema');const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=th==='dark'?'#0d1012':'#e4dccb';}
+setTheme(document.documentElement.getAttribute('data-theme')||'dark',false);
+$('themeBtn').onclick=()=>setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark',true);
+try{matchMedia('(prefers-color-scheme: light)').addEventListener('change',e=>{let s=null;try{s=localStorage.getItem(TKEY);}catch(err){}if(!s)setTheme(e.matches?'light':'dark',false);});}catch(e){}
 // Opstart
 function boot(){if(me&&me.mode==='solo'){game=loadSolo();checkVerdict();draw();cloudBoot();}
 else if(coop()){draw();loop();}
@@ -643,7 +667,7 @@ else draw();}
 // Det er en lås mod tilfældige besøgende, ikke rigtig sikkerhed: koden kan læses på GitHub.
 const GATE='51bf458c7c2cf1ceb30ae057cfe9ec8cd2cf1eec87da3c7a13aeced969031011',GATEKEY='kriminalkludder-adgang';
 async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
-function gate(){$('status').textContent='Låst';$('app').innerHTML=`<section class="panel gate"><div class="eyebrow">Kriminalkludder · Adgang kun for detektiver</div><h1>Adgang nægtet.</h1><p>Indtast hovedadgangskoden for at åbne sagsarkivet. Koden huskes på denne iPad.</p><form id="gateForm"><label for="gatePw">Adgangskode</label><input id="gatePw" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false"><div class="actions"><button class="big">Lås op</button></div></form><p id="gateErr" class="notice error hidden" role="alert">Forkert adgangskode.</p></section>`;
+function gate(){$('status').textContent='Låst';$('app').innerHTML=`<section class="panel gate"><div class="eyebrow">Detektivspillet · Adgang kun for detektiver</div><h1>Adgang nægtet.</h1><p>Indtast hovedadgangskoden for at åbne sagsarkivet. Koden huskes på denne iPad.</p><form id="gateForm"><label for="gatePw">Adgangskode</label><input id="gatePw" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false"><div class="actions"><button class="big">Lås op</button></div></form><p id="gateErr" class="notice error hidden" role="alert">Forkert adgangskode.</p></section>`;
 $('gatePw').focus();$('gateForm').onsubmit=async e=>{e.preventDefault();let ok=false;try{ok=await sha($('gatePw').value)===GATE;}catch(err){}if(ok){lsSet(GATEKEY,GATE);boot();}else{$('gateErr').classList.remove('hidden');$('gatePw').value='';const p=document.querySelector('.gate');p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake');}};}
 if(lsGet(GATEKEY)===GATE)boot();else gate();
 </script></body></html>

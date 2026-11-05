@@ -1,4 +1,4 @@
-# Detektivspillet CoOp · Kriminalkludder
+# Detektivspillet
 
 Et detektivspil for to personer på hver sin iPad.
 
@@ -32,3 +32,7 @@ Projektets URL og den offentlige nøgle står øverst i scriptet i `Detektivspil
 ## Nye sager
 
 Hver sagsbunke er en fil i `cases/` med 10 sager, der kalder `KK.push({...})`. Tilføj filen som `<script>` i `Detektivspillet.html` efter de eksisterende bunker. Numrene (`nr`) skal fortsætte uden huller, fordi gemte fremskridt peger på sagens plads.
+
+## Lyst og mørkt tema
+
+Spillet følger iPadens egen indstilling for lyst/mørkt. Knappen øverst til højre skifter manuelt, og valget huskes på enheden.
