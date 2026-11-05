@@ -1,6 +1,6 @@
 # Detektivspillet
 
-Et detektivspil for to personer på hver sin iPad.
+Et detektivspil for to personer, hver på sin skærm.
 
 - **Feltagent** har sporene fra gerningsstedet. De indsnævrer hver kategori til to muligheder.
 - **Centralen** har alibier, analyser og logs, der udelukker én mulighed i hver kategori.
@@ -8,11 +8,11 @@ Et detektivspil for to personer på hver sin iPad.
 
 Sporene er rapporter, obduktionserklæringer, mobiltelefoner og computere man kan låse op, lydoptagelser, overvågningsvideo, gerningsstedsfotos og -skitser. 150 sager i alt.
 
-Lydoptagelserne læses op med enhedens bedste danske stemme (Premium/Forbedret/Neural vælges automatisk). På iPad kan man hente en bedre stemme under Indstillinger → Tilgængelighed → Oplæst indhold → Stemmer → Dansk.
+Lydoptagelserne læses op med enhedens bedste danske stemme (Premium/Forbedret/Neural vælges automatisk). På iPad og iPhone kan man hente en bedre stemme under Indstillinger → Tilgængelighed → Oplæst indhold → Stemmer → Dansk.
 
 ## Spil
 
-Åbn `Detektivspillet.html` (eller siden på GitHub Pages) på begge iPads. Den ene opretter et makkerpar og får en kode på fem tegn, den anden skriver koden.
+Åbn `Detektivspillet.html` (eller siden på GitHub Pages) på begge enheder. Den ene opretter et makkerpar og får en kode på fem tegn, den anden skriver koden.
 
 ## Server: Supabase
 

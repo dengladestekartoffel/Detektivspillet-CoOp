@@ -73,8 +73,10 @@ returns boolean language plpgsql security definer set search_path = public as $$
 begin
   if p_code is null or p_code !~ '^[A-Z2-9]{5}$' or p_data is null then raise exception 'mangler data'; end if;
   if octet_length(p_data::text) > 200000 then raise exception 'for stor'; end if;
-  -- Ryd op i rum, ingen har rørt i et halvt år.
-  delete from detektiv_rooms where greatest(updated_at, coalesce(seen_felt, updated_at), coalesce(seen_central, updated_at)) < now() - interval '180 days';
+  -- Ryd op i rum, ingen har rørt i et halvt år. Rum med opklarede sager slettes aldrig.
+  delete from detektiv_rooms
+  where greatest(updated_at, coalesce(seen_felt, updated_at), coalesce(seen_central, updated_at)) < now() - interval '180 days'
+    and coalesce(jsonb_array_length(data->'solved'), 0) = 0;
   insert into detektiv_rooms(code, data) values (p_code, p_data) on conflict (code) do nothing;
   return found;
 end $$;
@@ -114,3 +116,16 @@ revoke all on function public.detektiv_room_push(text, int, jsonb) from public;
 grant execute on function public.detektiv_room_create(text, jsonb) to anon, authenticated;
 grant execute on function public.detektiv_room_poll(text, int, text) to anon, authenticated;
 grant execute on function public.detektiv_room_push(text, int, jsonb) to anon, authenticated;
+
+-- ── Sikkerhedskopier af makkerpar-rum ───────────────────────────────────────
+-- Kun til brug fra SQL Editor (ingen adgang fra browseren). Tag en kopi med:
+--   insert into public.detektiv_room_backups(code, data, note)
+--   select code, data, 'beskrivelse' from public.detektiv_rooms where code = 'XXXXX';
+create table if not exists public.detektiv_room_backups (
+  id bigserial primary key,
+  code text not null,
+  data jsonb not null,
+  note text,
+  saved_at timestamptz not null default now()
+);
+alter table public.detektiv_room_backups enable row level security;
