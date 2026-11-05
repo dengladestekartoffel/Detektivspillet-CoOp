@@ -1,0 +1,32 @@
+# Detektivspillet CoOp · Kriminalkludder
+
+Et detektivspil for to personer på hver sin iPad.
+
+- **Feltagent** har sporene fra gerningsstedet. De indsnævrer hver kategori til to muligheder.
+- **Centralen** har alibier, analyser og logs, der udelukker én mulighed i hver kategori.
+- Ingen af jer kan løse sagen alene. Tal sammen, streg ud på den fælles tavle, og rejs anklagen.
+
+Sporene er rapporter, obduktionserklæringer, mobiltelefoner og computere man kan låse op, lydoptagelser (læses op af iPad'ens danske stemme), overvågningsvideo, gerningsstedsfotos og -skitser.
+
+## Spil
+
+Åbn `Detektivspillet.html` (eller siden på GitHub Pages) på begge iPads. Den ene opretter et makkerpar og får en kode på fem tegn, den anden skriver koden.
+
+## Server: Supabase
+
+Makkerpar, online-gemning og rangliste kører på Supabase. Kør `supabase-setup.sql` én gang i Supabase → SQL Editor. Filen kan trygt køres igen.
+
+Projektets URL og den offentlige nøgle står øverst i scriptet i `Detektivspillet.html` (`SUPA`).
+
+## Filer
+
+| Fil | Indhold |
+| --- | --- |
+| `Detektivspillet.html` | Spillet: lobby, makkerpar, tavle, anklage, effekter og de første 8 sager |
+| `spor.js` | Motoren der tegner spor: telefoner, computere, obduktion, lyd, video, fotos, skitser, portrætter |
+| `cases/pakke-01.js` | Sagsbunke 1 (sag 9–18) |
+| `supabase-setup.sql` | Tabeller og funktioner i Supabase |
+
+## Nye sager
+
+Hver sagsbunke er en fil i `cases/` med 10 sager, der kalder `KK.push({...})`. Tilføj filen som `<script>` i `Detektivspillet.html` efter de eksisterende bunker. Numrene (`nr`) skal fortsætte uden huller, fordi gemte fremskridt peger på sagens plads.

@@ -20,7 +20,7 @@ begin
   if p_code is null or p_data is null then raise exception 'mangler data'; end if;
   if octet_length(p_data::text) > 200000 then raise exception 'for stor'; end if;
   if jsonb_typeof(p_data->'solved') = 'array' then
-    s := least(jsonb_array_length(p_data->'solved'), 8);
+    s := least(jsonb_array_length(p_data->'solved'), 1000);
     select coalesce(sum(case when (p_data->'attempts'->>x) ~ '^\d{1,4}$' then (p_data->'attempts'->>x)::int else 0 end), 0)
       into a from jsonb_array_elements_text(p_data->'solved') as x;
   end if;
