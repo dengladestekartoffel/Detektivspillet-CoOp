@@ -6,7 +6,9 @@ Et detektivspil for to personer på hver sin iPad.
 - **Centralen** har alibier, analyser og logs, der udelukker én mulighed i hver kategori.
 - Ingen af jer kan løse sagen alene. Tal sammen, streg ud på den fælles tavle, og rejs anklagen.
 
-Sporene er rapporter, obduktionserklæringer, mobiltelefoner og computere man kan låse op, lydoptagelser (læses op af iPad'ens danske stemme), overvågningsvideo, gerningsstedsfotos og -skitser.
+Sporene er rapporter, obduktionserklæringer, mobiltelefoner og computere man kan låse op, lydoptagelser, overvågningsvideo, gerningsstedsfotos og -skitser. 150 sager i alt.
+
+Lydoptagelserne læses op med enhedens bedste danske stemme (Premium/Forbedret/Neural vælges automatisk). På iPad kan man hente en bedre stemme under Indstillinger → Tilgængelighed → Oplæst indhold → Stemmer → Dansk.
 
 ## Spil
 
@@ -24,7 +26,7 @@ Projektets URL og den offentlige nøgle står øverst i scriptet i `Detektivspil
 | --- | --- |
 | `Detektivspillet.html` | Spillet: lobby, makkerpar, tavle, anklage, effekter og de første 8 sager |
 | `spor.js` | Motoren der tegner spor: telefoner, computere, obduktion, lyd, video, fotos, skitser, portrætter |
-| `cases/pakke-01.js` | Sagsbunke 1 (sag 9–18) |
+| `cases/pakke-01.js` … `pakke-15.js` | Sagsbunke 1–15 (sag 9–150), hver med sit eget tema |
 | `supabase-setup.sql` | Tabeller og funktioner i Supabase |
 
 ## Nye sager
