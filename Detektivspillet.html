@@ -1,0 +1,401 @@
+<!doctype html><html lang="da"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Detektivspillet — Kriminalkludder</title><style>
+:root{--ink:#2b2420;--paper:#efe3c8;--paper2:#fbf3df;--teal:#2f5759;--wine:#7e3b52;--red:#a3231b;--gold:#c99a4a;--green:#2f6b45}
+*{box-sizing:border-box}
+html{background:#15191b}
+body{margin:0;background:radial-gradient(ellipse at 50% -10%,#4d5c60 0%,#262c2f 45%,#111416 100%) fixed;color:var(--ink);font:17px/1.6 Georgia,'Times New Roman',serif;min-height:100vh;overflow-x:hidden}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:0}
+.lamp{position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse 60% 45% at 50% 0%,rgba(255,214,140,.16),transparent 70%);animation:flicker 7s infinite}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:1;box-shadow:inset 0 0 180px 40px rgba(0,0,0,.7)}
+#flash{position:fixed;inset:0;pointer-events:none;z-index:2;background:#dfe9ff;opacity:0}
+#flash.on{animation:lightning 1.1s ease-out}
+@keyframes lightning{0%{opacity:0}5%{opacity:.35}10%{opacity:.05}16%{opacity:.25}100%{opacity:0}}
+@keyframes flicker{0%,100%{opacity:1}47%{opacity:1}48%{opacity:.55}49%{opacity:1}51%{opacity:.7}52%{opacity:1}80%{opacity:.92}}
+.wrap{position:relative;z-index:3;max-width:1160px;margin:auto;padding:24px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;color:#efdfbc;margin-bottom:22px}
+.brand{font:clamp(24px,4.4vw,42px) Impact,'Arial Black',sans-serif;letter-spacing:2px;color:#f3e2b8;text-shadow:0 0 8px rgba(255,190,90,.55),0 0 22px rgba(255,140,60,.35),2px 3px #000;animation:neon 6s infinite}
+@keyframes neon{0%,100%{opacity:1}62%{opacity:1}63%{opacity:.4}64%{opacity:1}66%{opacity:.6}67%{opacity:1}}
+.small{font:12px/1.7 'Courier New',monospace}
+.tagline{min-height:1.7em}
+.panel{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.25),transparent 30%),repeating-linear-gradient(0deg,rgba(120,90,50,.035) 0 2px,transparent 2px 5px),var(--paper);border:1px solid #aa9877;border-top:7px solid var(--teal);border-radius:12px;padding:28px;box-shadow:0 18px 50px rgba(0,0,0,.55),inset 0 0 80px rgba(140,100,50,.18);animation:folderIn .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes folderIn{from{opacity:0;transform:perspective(900px) rotateX(-10deg) translateY(30px)}to{opacity:1;transform:none}}
+.panel.shake{animation:shake .5s}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-9px)}40%,60%{transform:translateX(9px)}}
+.cols{display:grid;grid-template-columns:1.45fr 1fr;gap:26px}
+h1{font-size:clamp(35px,5vw,58px);line-height:1.1;margin:12px 0 20px;letter-spacing:-1px}
+h2,h3{line-height:1.25}
+button,input,textarea,select{font:inherit}
+button{position:relative;border:1px solid #615039;cursor:pointer;min-height:46px;padding:10px 17px;border-radius:7px;box-shadow:0 3px #6f5734;background:linear-gradient(#e2c787,#b58d46);color:#2d2823;font-weight:bold;transition:transform .12s,filter .15s,box-shadow .12s}
+button:hover{filter:brightness(1.08)}
+button:active{transform:translateY(2px);box-shadow:0 1px #6f5734}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.secondary{background:linear-gradient(#f5ead5,#cfc1a4);box-shadow:0 3px #827359}
+button.big{font-size:19px;padding:14px 26px;background:linear-gradient(#c94a3b,#8e2219);color:#fff4e4;border-color:#5d140e;box-shadow:0 4px #4d0f0a;letter-spacing:.5px}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #8a4d70;outline-offset:3px}
+input,textarea{width:100%;padding:11px;background:#fff9e9;color:#302b29;border:1px solid #a29273;border-radius:5px;font-size:16px}
+textarea{min-height:240px;resize:vertical;background:repeating-linear-gradient(#fff9e9 0 29px,#c9d7e0 29px 30px);line-height:30px;font-family:'American Typewriter','Courier New',monospace}
+label{display:block;font-weight:bold;margin:15px 0 6px}
+.actions,nav{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
+.notice{background:#fff4cf;border-left:4px solid #b68b3d;padding:13px 16px;font-size:15px}
+.error{background:#f6d8cc;border-color:#9c5142}
+.success{background:#dce9cf;border-color:#4c7757}
+.eyebrow{font:bold 12px monospace;letter-spacing:1.5px;color:#765b3e;text-transform:uppercase}
+.badge{border:1px solid #aaa083;border-radius:5px;padding:5px 10px;background:#403d38;color:#f4e7cb;font:12px monospace;white-space:nowrap}
+.badge.live{background:#375d49}
+.hidden{display:none!important}
+footer{position:relative;z-index:3;color:#bfb29a;margin:25px 0;font:12px/1.8 monospace}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);max-width:90%;background:#fff0c8;color:#302b29;border:2px solid #8f713d;border-radius:8px;padding:12px 20px;z-index:60;box-shadow:0 8px 24px #0007;animation:toastIn .3s}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,20px)}}
+.hint{font-size:14px;color:#695943}
+details{margin:18px 0}summary{cursor:pointer;font-weight:bold}
+
+/* Arkiv */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px;margin-top:22px}
+.card{position:relative;border:1px solid #b09060;background:linear-gradient(#e9d4a6,#dcc08a);padding:26px 20px 20px;border-radius:3px 10px 8px 8px;box-shadow:0 6px 16px rgba(0,0,0,.25);transition:transform .25s,box-shadow .25s;animation:dealIn .5s both;animation-delay:calc(var(--i)*70ms)}
+.card:before{content:'';position:absolute;top:-14px;left:-1px;width:42%;height:15px;background:#e2c993;border:1px solid #b09060;border-bottom:0;border-radius:6px 10px 0 0}
+.card:hover{transform:translateY(-6px) rotate(-.8deg);box-shadow:0 14px 28px rgba(0,0,0,.35)}
+.card.done{background:linear-gradient(#dfe3c8,#c9d2ac)}
+.card.done:before{background:#d6dcbc}
+.card .victim{font:13px/1.5 'Courier New',monospace;color:#5b4630}
+@keyframes dealIn{from{opacity:0;transform:translateY(40px) rotate(4deg)}}
+.cardstamp{position:absolute;top:18px;right:12px;transform:rotate(-14deg);border:3px double var(--green);color:var(--green);font:bold 15px 'Courier New',monospace;padding:2px 8px;letter-spacing:2px;opacity:.85;mix-blend-mode:multiply}
+
+/* Sag */
+.dossier{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font:14px/1.6 'Courier New',monospace;background:var(--paper2);border:1px dashed #a08a66;padding:12px 16px;margin:14px 0}
+.dossier b{color:#6a4f33}
+.brief{font-size:18px;border-left:3px solid var(--wine);padding-left:14px}
+nav button{background:#d8caae}
+nav .active{background:var(--teal);color:#fff4dc;box-shadow:0 3px #15393a}
+.evidence{position:relative;padding:22px 20px 18px;background:var(--paper2);border:1px solid #c1b193;box-shadow:3px 5px 0 rgba(130,100,60,.25);margin-bottom:20px;transform:rotate(var(--r,0deg));animation:docIn .55s both;animation-delay:calc(var(--i)*110ms)}
+.evidence:nth-child(odd){--r:-.35deg}.evidence:nth-child(even){--r:.4deg}
+@keyframes docIn{from{opacity:0;transform:translateX(-40px) rotate(-3deg)}}
+.evidence:before{content:'FORTROLIGT • INTERN KOPI';color:#8f775b;font:11px monospace;letter-spacing:1px}
+.evidence:after{content:'';position:absolute;top:-9px;right:28px;width:16px;height:38px;border:3px solid #8a8f95;border-radius:9px;border-bottom-color:transparent;transform:rotate(8deg)}
+.evidence.central{border-left:6px solid var(--teal);background:linear-gradient(90deg,rgba(47,87,89,.07),transparent 40%),var(--paper2)}
+.evidence.field{border-left:6px solid var(--wine)}
+.evidence h3{margin:4px 0 2px}
+.src{font:12px/1.5 'Courier New',monospace;color:#6f5b42;border-bottom:1px dotted #b8a37f;padding-bottom:6px;margin-bottom:8px}
+.concl{font:bold 15px/1.5 'Courier New',monospace;background:#f5e9b5;padding:8px 10px;border:1px solid #d8c27a;margin-top:10px;min-height:2.6em}
+.concl .lab{color:var(--red)}
+.caret{display:inline-block;width:8px;height:1em;background:#2b2420;vertical-align:-2px;animation:blink .7s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sec-title{display:flex;align-items:center;gap:10px}
+.sec-title:after{content:'';flex:1;height:1px;background:#b5a17b}
+
+.board{position:sticky;top:12px;align-self:start;background:#3a3129;color:#f2e6cc;border-radius:10px;padding:20px;box-shadow:inset 0 0 0 6px #5a4632,inset 0 0 40px rgba(0,0,0,.6),0 10px 24px rgba(0,0,0,.4)}
+.board h3{margin-top:0;color:#f7dca0}
+.board .hint{color:#cdbb98}
+.board h4{margin:16px 0 4px;color:#e8c98a;font:bold 13px monospace;letter-spacing:1.5px;text-transform:uppercase}
+.board button.opt{display:block;width:100%;text-align:left;margin:7px 0;min-height:44px;padding:8px 14px;background:#fff9ea;box-shadow:0 2px #9b8865;font-weight:normal;overflow:visible;transform:rotate(var(--r,0deg))}
+.board button.opt:nth-of-type(odd){--r:-.4deg}.board button.opt:nth-of-type(even){--r:.5deg}
+.opt:after{content:'';position:absolute;left:6px;right:6px;top:52%;height:3px;border-radius:2px;background:var(--red);transform:scaleX(0) rotate(-1.5deg);transform-origin:left;transition:transform .32s cubic-bezier(.6,0,.3,1)}
+.opt.struck{background:#d9ccb1!important;color:#7a6c58}
+.opt.struck:after{transform:scaleX(1) rotate(-1.5deg)}
+.opt.scratch{animation:scratch .3s}
+@keyframes scratch{30%{transform:translateX(3px) rotate(.6deg)}60%{transform:translateX(-3px) rotate(-.6deg)}}
+.ring{position:absolute;left:-10px;top:-8px;width:calc(100% + 20px);height:calc(100% + 16px);pointer-events:none;overflow:visible}
+.ring path{fill:none;stroke:var(--red);stroke-width:3;stroke-linecap:round;stroke-dasharray:640;stroke-dashoffset:640;transition:stroke-dashoffset .7s ease-out}
+.opt.last .ring path{stroke-dashoffset:0}
+.opt.last{font-weight:bold!important}
+.ready{margin-top:16px;padding:12px 14px;border:2px dashed #e7b75d;border-radius:8px;color:#ffe2a0;font-weight:bold;animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 18px rgba(240,180,80,.55)}}
+
+/* Kartotek */
+.files{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.file{position:relative;background:var(--paper2);border:1px solid #c1b193;padding:16px;box-shadow:2px 4px 0 rgba(130,100,60,.2);animation:docIn .45s both;animation-delay:calc(var(--i)*60ms)}
+.file .who{display:flex;gap:12px;align-items:center}
+.avatar{flex:none;width:52px;height:52px;border-radius:4px;background:linear-gradient(135deg,#6d6156,#2f2a26);color:#f2e6cc;display:grid;place-items:center;font:bold 20px Impact,sans-serif;letter-spacing:1px;box-shadow:inset 0 0 0 3px #fff9ea,0 0 0 1px #8d7b60;filter:sepia(.4)}
+.file.struck{opacity:.55}
+.file.struck .who h4{text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:3px}
+.file h4{margin:0}
+.file p{margin:8px 0 0;font-size:15px}
+.xstamp{position:absolute;right:10px;bottom:8px;transform:rotate(-12deg);color:var(--red);border:2px solid var(--red);font:bold 12px monospace;padding:1px 6px;letter-spacing:1px}
+
+/* Tidslinje */
+.timeline{position:relative;margin:10px 0 0 10px;padding-left:28px;border-left:3px solid #8d7b60}
+.tl{position:relative;margin:0 0 18px;animation:docIn .45s both;animation-delay:calc(var(--i)*90ms)}
+.tl:before{content:'';position:absolute;left:-38px;top:5px;width:15px;height:15px;border-radius:50%;background:var(--wine);box-shadow:0 0 0 4px var(--paper)}
+.tl b{font:bold 15px 'Courier New',monospace;color:var(--wine);display:block}
+
+/* Anklage */
+.accuse{background:var(--paper2);border:1px solid #c1b193;padding:22px;box-shadow:inset 0 0 40px rgba(150,110,60,.15)}
+.group{margin:18px 0}
+.group h4{margin:0 0 8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.auto{font:bold 11px monospace;letter-spacing:1px;color:#fff;background:var(--teal);padding:2px 8px;border-radius:20px;animation:popIn .4s}
+@keyframes popIn{from{transform:scale(0)}}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{background:#fff9ea;box-shadow:0 2px #b5a17b;font-weight:normal;min-height:44px}
+.chip.struck{color:#8b7c66;text-decoration:line-through;text-decoration-color:var(--red);background:#e6dbc4}
+.chip.sel{background:linear-gradient(#3e6c6e,#2a4f51);color:#fff4dc;border-color:#173536;box-shadow:0 3px #102a2b;font-weight:bold;text-decoration:none;animation:selPop .3s}
+@keyframes selPop{50%{transform:scale(1.07)}}
+.chip.sel:before{content:'✔ '}
+.solution{margin-top:18px;background:#fff9ea;border:1px solid #9fb08d;border-left:6px solid var(--green);padding:16px 18px}
+
+/* Stempel og avis */
+#overlay{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(10,8,6,.55);backdrop-filter:blur(2px);animation:fade .25s}
+@keyframes fade{from{opacity:0}}
+.stamp{font:bold clamp(46px,11vw,120px)/1 'Courier New',monospace;letter-spacing:6px;padding:10px 28px;border:10px double currentColor;border-radius:10px;transform:rotate(-14deg);animation:slam .45s cubic-bezier(.3,1.6,.6,1) both;text-shadow:0 0 1px currentColor;mix-blend-mode:screen}
+.stamp.ok{color:#5fd68a}.stamp.bad{color:#ff5a48}
+@keyframes slam{0%{opacity:0;transform:scale(3.2) rotate(-4deg)}70%{opacity:1;transform:scale(.92) rotate(-14deg)}100%{transform:scale(1) rotate(-14deg)}}
+.newspaper{width:min(680px,92vw);max-height:88vh;overflow:auto;background:linear-gradient(#f4eedf,#e4dac2);color:#1d1a17;padding:26px 30px;box-shadow:0 30px 80px rgba(0,0,0,.7);animation:spinIn 1s cubic-bezier(.2,.8,.3,1) both;filter:sepia(.15)}
+@keyframes spinIn{from{transform:rotate(-720deg) scale(.05);opacity:0}to{transform:rotate(-1.5deg) scale(1);opacity:1}}
+.mast{text-align:center;font:bold clamp(28px,6vw,52px)/1 'Times New Roman',serif;letter-spacing:1px;border-bottom:4px double #1d1a17;padding-bottom:8px}
+.dateline{display:flex;justify-content:space-between;font:12px 'Courier New',monospace;border-bottom:1px solid #1d1a17;padding:4px 0;margin-bottom:14px}
+.newspaper h2{font:900 clamp(24px,4.6vw,40px)/1.05 Impact,'Arial Black',sans-serif;text-transform:uppercase;margin:6px 0 12px}
+.newspaper .lede{column-count:2;column-gap:22px;text-align:justify;font-size:15px}
+.newspaper .lede:first-letter{font:bold 46px/1 Georgia,serif;float:left;margin:4px 6px 0 0}
+@media(max-width:760px){.wrap{padding:14px}.panel{padding:20px}.cols{grid-template-columns:1fr}.board{position:static}.actions button{flex-grow:1}header{align-items:flex-start}.small{font-size:11px}.newspaper .lede{column-count:1}.dossier{grid-template-columns:1fr}}
+.online{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:26px;padding:22px;background:#3a3129;color:#f2e6cc;border-radius:10px;box-shadow:inset 0 0 0 6px #5a4632,inset 0 0 40px rgba(0,0,0,.6)}
+.online h3{margin-top:0;color:#f7dca0}.online .hint{color:#cdbb98}.online label{color:#f2e6cc}
+.rank{list-style:none;padding:0;margin:0}.rank li{display:grid;grid-template-columns:2.2em 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px dashed #6d5a44;animation:docIn .4s both}
+.rank li span:last-child{font:12px monospace;color:#d9c79f}
+.code{display:block;background:#1f1a16;color:#ffe2a0;padding:8px 10px;border-radius:5px;font:13px monospace;word-break:break-all}
+@media(max-width:760px){.online{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style><body><canvas id="fx"></canvas><div class="lamp"></div><div class="vignette"></div><div id="flash"></div><div class="wrap"><header><div><div class="brand">KRIMINALKLUDDER</div><div class="small tagline" id="tagline"></div></div><span class="badge" id="status"></span></header><main id="app"></main><footer>Detektivspillet · Kriminalkludder · Singleplayer · Én HTML-fil, én enhed · Otte sager.<br>Ingen netværksforbindelse nødvendig. Fremskridt gemmes lokalt i browseren og kan hentes som sikkerhedskopi.<br>Sikkerhedskopier fra to-iPad-udgaven kan indlæses.<br>Al sagskode findes i HTML-filen. Lad være med at kigge.</footer></div><div id="toast" class="hidden" role="status"></div><input id="import" type="file" accept=".json,application/json" hidden><script>
+'use strict';
+// Singleplayer-udgave. Ingen netværk, ingen database. Alt gemmes lokalt.
+// Hver sag: feltrapporter indsnævrer hver kategori til to muligheder; centralen udelukker den ene.
+const CASES=[
+{title:'Den sidste skål',no:'K-0314',when:'Lørdag 14. marts · ca. 22:40',where:'Restaurant Salt & Sølv, Christianshavn',victim:'Henrik Malling (58), restauratør og ejer',
+intro:'En restauratør findes død efter en lukket jubilæumsmiddag. Alle fire gæster havde noget at skjule.',
+brief:'Salt & Sølv fejrede 25 år med en lukket middag for fire særligt indbudte. Kl. 23:15 fandt opvaskeren Samir Aziz ejeren Henrik Malling livløs bag skrivebordet på kontoret. Døren var lukket, men ikke låst. I ugen op til jubilæet havde Malling sagt til flere, at han "skulle rydde op i huset". Én af gæsterne ville åbenbart ikke vente på oprydningen.',
+options:[['Vera, revisor','Bjørn, kok','Mona, partner','Egon, leverandør'],['Brevkniv','Tung lysestage','Forgiftet likør'],['Vinkælder','Kontor','Spisestue']],answer:[0,1,2],
+info:[['Restaurantens eksterne revisor gennem 11 år. Malling havde opdaget et hul på 1,2 mio. kr. i kassebeholdningen og bestilt en uvildig gennemgang til mandag.','Køkkenchef siden åbningen. Blev fyret to dage før middagen uden fratrædelse og uden den medejerandel, han var blevet lovet.','Medejer med 40 %. Malling ville tvinge hende ud til en pris, hun selv kaldte "et røveri ved højlys dag".','Leverer fisk og skaldyr. Skyldte Malling 300.000 kr. for et privat lån, der forfaldt dagen efter.'],
+['Sølvbrevkniv med graveret monogram. Ligger normalt på skrivebordet i kontoret.','Massiv messing, 2,3 kg. Én af de to lysestager fra jubilæumsbordet manglede, da betjentene ankom.','Hjemmelavet valnøddelikør, skænket til kaffen. Malling drak to glas.'],
+['Kølig kælder under køkkenet med 1.400 flasker. Elektronisk kodelås med log.','Lille rum bag baren. Her blev liget fundet.','Den private spisestue på 1. sal, hvor middagen blev holdt. Gulvet har pletter af spildt rødvin.']],
+timeline:[['19:00','Gæsterne ankommer. Champagne i baren.'],['19:30','Middagen serveres i spisestuen på 1. sal.'],['22:15','Dessert. Malling holder en kort tale om "nye tider".'],['22:20','Selskabet går fra hinanden: rygepauser, toiletbesøg, telefonopkald.'],['23:15','Samir Aziz finder Malling på kontoret og ringer 112.'],['23:31','Første patrulje ankommer.']],
+evidence:[[['Vidneforklaring · Opvasker Samir Aziz · afgivet 23:52','"Ved tyve minutter i elleve hørte jeg nogen skændes gennem ventilationen. Malling og en anden. Den anden var rasende og talte bredt jysk, sådan rigtig vestjysk." Efterforskerne har kontrolleret gæsternes baggrund: kun Vera og Bjørn er fra Jylland. Mona og Egon er født og opvokset på Sjælland.','Gerningspersonen er enten Vera, revisor eller Bjørn, kok.'],
+['Foreløbig obduktion · Retsmedicinsk Institut · 15. marts','Afdøde har et kraftigt slag mod baghovedet. Blodprøven viser samtidig et forhøjet indhold af et endnu uidentificeret stof. Det kan derfor ikke afgøres, hvilken af de to ting der var dødelig. Der er ingen stik- eller snitlæsioner på kroppen.','Mordvåbnet er enten Tung lysestage eller Forgiftet likør. Brevkniven er udelukket.'],
+['Teknisk rapport · Kriminalteknisk Center · 15. marts','Ligpletterne viser, at Malling blev flyttet 30 til 45 minutter efter døden. Kontoret er altså ikke gerningsstedet. På hælene sidder slæbespor med rødvin og fine sandkorn. Rødvinen stammer fra spisestuen, sandet fra vinkælderen. Teknikerne kan ikke sige, hvilket spor der stammer fra selve drabet.','Drabet skete enten i Spisestue eller i Vinkælder.']],
+[['Taxalog · Centralen · 16. marts','Bjørn bestilte en taxa via app kl. 22:18 og blev samlet op foran restauranten kl. 22:21. GPS-sporet viser turen til Valby, og han betalte med kort kl. 22:51. Han var ikke i bygningen, da skænderiet fandt sted.','Bjørn, kok kan ikke være gerningspersonen.'],
+['Toksikologisk svar · Retskemisk Afdeling · 17. marts','Det ukendte stof er almindelig migrænemedicin i normal dosis. Likørflasken og de brugte glas er analyseret, og der er ingen giftstoffer.','Forgiftet likør er udelukket som mordvåben.'],
+['Adgangslog · Vinkælderens kodelås','Sidste åbning kl. 18:47, da tjeneren hentede vin til middagen. Derefter ingen åbninger før politiets ankomst kl. 23:31. Sandet på hælene må stamme fra tidligere på dagen.','Drabet kan ikke være sket i Vinkælder.']]],
+epilogue:'Vera Holt havde i årevis flyttet penge fra kassen til en konto på Cypern. Da Malling under desserten nævnte en "uvildig gennemgang", fulgte hun ham tilbage til den tomme spisestue, hvor han havde glemt sin telefon. Skænderiet blev højlydt, og Samir hørte den vestjyske stemme gennem ventilationen. Vera greb lysestagen fra bordet. Bagefter slæbte hun Malling ned på kontoret, så det skulle ligne et indbrud. Sandet på hans hæle stammede fra hans egen tur i vinkælderen om eftermiddagen.',
+headline:'Revisor anholdt for jubilæumsdrab'},
+
+{title:'Premieren der gik galt',no:'K-0402',when:'Torsdag 2. april · ca. 19:15',where:'Teatret Fyrtårnet, Aarhus',victim:'Margrethe Bang (61), teaterdirektør',
+intro:'Teatrets direktør findes død kort før tæppet skulle gå. Ingen vil indrømme at have forladt prøven.',
+brief:'Premieren på "Tågen over Limfjorden" skulle begynde kl. 20:00. Kl. 19:35 fandt sufflør Ida Brandt teaterdirektør Margrethe Bang død i sin kontorstol. Forestillingen blev aflyst, publikum blev sendt hjem, og fire personer fra produktionen blev bedt om at blive. Samme morgen havde Bang sendt en mail til bestyrelsen med emnelinjen "Konsekvenser".',
+options:[['Lise, skuespiller','Arne, tekniker','Ruth, producent','Kaj, instruktør'],['Rekvisitdolk','Scenelod','Forgiftet kaffe'],['Garderobe','Værksted','Direktørkontor']],answer:[1,2,0],
+info:[['Har spillet hovedrollen i tre sæsoner. Blev i sidste uge sat på som understudy, fordi direktøren ville have et tv-navn på plakaten.','Scenetekniker i 22 år. Fik skylden for en projektør, der faldt ned i februar og ramte en danser. Selv mener han, at direktøren havde sparet på sikkerhedstjekket.','Producent med personlige garantier for 2 mio. kr. Direktøren truede med at trække teatrets andel ud.','Instruktør. Bang havde kaldt hans opsætning "pinlig" og ville udskifte ham før næste sæson.'],
+['Fra 2. akt. Blankt stål, men med afrundet spids. Opbevares i det plomberede rekvisitskab.','Kontravægt på 12 kg fra trækkesystemet. Flere lå løst på sidescenen.','Direktøren drak altid sort kaffe fra en termokande før premierer. Kanden blev fundet tom.'],
+['Hovedrollens garderobe ved bagscenen med spejl, sminkebord og sofa.','Snedkerværkstedet under scenen. Fuldt af savsmuld.','Ligger på 2. sal. Her blev liget fundet.']],
+timeline:[['18:30','Sidste lysprøve.'],['18:51','Et nøglekort åbner døren til bagscenen-gangen.'],['19:05','Kaffekanden står på bordet i gangen ved garderoberne.'],['19:35','Liget findes på direktørkontoret.'],['19:40','Publikum får besked om aflysningen.']],
+evidence:[[['Adgangslog · Døren til bagscenen-gangen','Gangen bag scenen kan kun åbnes med nøglekort og har ingen anden indgang. Mellem 18:45 og 19:30 blev kun to kort brugt: Arne Lunds (kl. 18:51 og 19:12) og Ruth Kjærs (kl. 18:51). Lise og Kaj havde ikke adgang i tidsrummet.','Gerningspersonen er enten Arne, tekniker eller Ruth, producent.'],
+['Foreløbig obduktion · Retsmedicinsk Institut, Aarhus','Der er ingen knusningsskader, så et 12 kg lod kan udelukkes. Der er en 1 cm dyb rift i venstre håndflade og samtidig tegn på hjerterytmeforstyrrelse, som kan skyldes gift. Det er ikke afgjort, hvad der var dødeligt. Giften blev i givet fald indtaget efter kl. 19:00.','Mordvåbnet er enten Forgiftet kaffe eller Rekvisitdolk.'],
+['Teknisk rapport · Kriminalteknisk Center','Bagsiden af afdødes sorte nederdel er dækket af savsmuld, og på ærmet sidder hvidt sminkepudder af den type, der bruges i garderoberne. Ligpletterne viser, at hun blev flyttet efter døden. Kontoret er ikke gerningsstedet.','Drabet skete enten i Garderobe eller i Værksted.']],
+[['Radiolog · Centralen','Ruth deltog i et direkte radiointerview med P4 Østjylland fra teatrets foyer fra 18:55 til 19:30. Lydfilen og studieloggen er kontrolleret. Hun forlod ikke mikrofonen.','Ruth, producent kan ikke være gerningspersonen.'],
+['Våbenundersøgelse · Rekvisitskabet','Rekvisitdolken lå i det plomberede skab, og plomben var ubrudt. Riften i hånden passer med skåret på et revnet kaffekrus, der blev fundet i papirkurven.','Rekvisitdolken er udelukket som mordvåben.'],
+['Alarmlog · Snedkerværkstedet','Værkstedet var låst og alarmen slået til fra 17:00 til 22:10. Savsmulden kommer fra kontorstolen, som blev hentet op fra værkstedet efter en reparation samme formiddag.','Drabet kan ikke være sket i Værksted.']]],
+epilogue:'Arne Lund var overbevist om, at direktøren ville fyre ham og lægge skylden for ulykken i februar på ham. Han knuste sin mors hjertemedicin og kom den i termokanden. Derefter ventede han i Lises garderobe, hvor Bang altid kiggede ind før en premiere. Da hun faldt om, bar han hende op på kontoret, så det skulle ligne et hjertestop ved skrivebordet. Hans eget nøglekort afslørede ham.',
+headline:'Tekniker anholdt – premieren aflyst for altid'},
+
+{title:'Et meget stille ophold',no:'K-0619',when:'Fredag 19. juni · ca. 23:30',where:'Badehotel Klitrosen, Skagen',victim:'Anders Krogh (66), hotelejer',
+intro:'Et badehotels ejer bliver fundet død under årets personalefest. Gæstelisten er kort. Regnskabet er grimt.',
+brief:'Klitrosen holdt sin årlige personalefest i baren. Kl. 00:20 fandt nattevagten hotelejer Anders Krogh i en lænestol i biblioteket med en åben bog i skødet, som om han var faldet i søvn. Det var han ikke. To dage tidligere havde Krogh underskrevet en hensigtserklæring om at sælge hotellet, og restauranten skulle lukkes.',
+options:[['Signe, receptionist','Bo, investor','Grete, køkkenchef','Poul, pedel'],['Pejsejern','Marmorfigur','Forgiftet te'],['Bibliotek','Vaskeri','Suite']],answer:[2,0,1],
+info:[['Receptionist i otte år. Krogh havde lovet hende direktørstillingen og så ombestemt sig.','Investor fra Aarhus. Hans købstilbud var blevet presset 4 mio. kr. op i sidste øjeblik.','Køkkenchef i 31 år og hjertet i hotellets restaurant. Salget betød, at hendes køkken skulle laves om til spa.','Pedel siden 1989. Bor gratis i et anneks, som den nye ejer ville rive ned.'],
+['Smedejern fra pejsen i biblioteket. Fundet nyvasket i redskabsstativet.','En havfrue i hvid marmor på en sokkel i suiten.','Krogh fik altid kamillete kl. 23. Koppen stod halvt tømt.'],
+['Her blev liget fundet, i lænestolen ved pejsen.','Hotellets vaskeri i kælderen. Varmt og larmende, med bagdør til gården.','Hotellets fineste værelse på 2. sal med havudsigt.']],
+timeline:[['21:00','Personalefesten begynder i baren.'],['22:40','Krogh holder en kort tale og forlader festen.'],['23:00','Natportieren stiller kamillete på Kroghs bakke.'],['23:30','Vaskemaskinerne i kælderen starter på tidsprogram.'],['00:20','Nattevagten finder Krogh i biblioteket.']],
+evidence:[[['Teknisk rapport · Fodspor','På trappen og i det fugtige område omkring liget er der aftryk af sikkerhedssko i størrelse 40 med et særligt skridsikkert mønster. Modellen udleveres kun til køkken- og teknikpersonale. Kun Grete og Poul havde den slags sko på arbejde den aften.','Gerningspersonen er enten Grete, køkkenchef eller Poul, pedel.'],
+['Obduktion · Retsmedicinsk Institut, Aalborg','Dødsårsagen er stump vold mod tindingen. Såret har en lang, smal fordybning med skrabespor, der kan stamme fra enten metal eller sten. Teen i koppen er analyseret, og der er ingen fremmede stoffer.','Mordvåbnet er enten Pejsejern eller Marmorfigur. Forgiftet te er udelukket.'],
+['Fiberanalyse · Kriminalteknisk Center','I Kroghs hår sidder fine bomuldsfnug og duftrester fra hotellets særlige linned. Den slags linned findes i store mængder to steder: i vaskeriet og på suitens nyredte senge. Liget er flyttet efter døden.','Drabet skete enten i Vaskeri eller i Suite.']],
+[['Serviceattest · Elevatorfirmaet','Poul sad fastklemt i den defekte personaleelevator sammen med en servicetekniker fra 22:55 til 00:05. Teknikerens tidsstemplede fotos og opkaldet til vagtcentralen bekræfter det.','Poul, pedel kan ikke være gerningspersonen.'],
+['Undersøgelse af marmorfiguren','Havfruen er boltet fast til soklen med fire ståltappe, og støvlaget på den er uberørt. Den har ikke været løftet i flere måneder.','Marmorfiguren er udelukket som mordvåben.'],
+['Gæsteforklaring og nøglekortlog · Suiten','Suiten var lejet af et bryllupspar, som var på værelset hele aftenen fra 21:30 med "Forstyr ikke"-skiltet på døren. Nøglekortloggen viser ingen andre adgange.','Drabet kan ikke være sket i Suite.']]],
+epilogue:'Grete Mølgaard havde givet 31 år til Klitrosens køkken. Da Krogh forlod festen, fulgte hun efter ham ned i vaskeriet, hvor han hentede en ren skjorte til næste dags møde med investoren. På vejen havde hun taget pejsejernet med fra biblioteket. Bagefter skyllede hun jernet i vaskeriets udslagsvask, kørte Krogh op i en linnedvogn og satte ham i lænestolen med en bog. Hendes sko efterlod sporene.',
+headline:'Køkkenchef sigtet for drab på badehotel'},
+
+{title:'Kunsten at forsvinde',no:'K-0911',when:'Fredag 11. september · ca. 21:50',where:'Galleri Lindholm, Bredgade, København',victim:'Viggo Lindholm (54), gallerist',
+intro:'En gallerist bliver dræbt efter en privat fremvisning. Et falsk maleri har sat gang i ægte konflikter.',
+brief:'Galleri Lindholm viste et nyfundet værk af guldaldermaleren Asger Thorlund frem. Maleriet var vurderet til 9 mio. kr., men måske er det ikke ægte. Kl. 22:15 blev galleristen Viggo Lindholm fundet død på sit kontor. Da han døde, var der kun fire gæster tilbage i bygningen. Kort forinden var strømmen gået i to minutter.',
+options:[['Nora, kunstner','Finn, samler','Ada, assistent','Leif, vurderingsmand'],['Bronzefigur','Paletkniv','Forgiftet vin'],['Depot','Kontor','Atelier']],answer:[3,1,2],
+info:[['Ung maler med atelier i baggården. Lindholm havde i årevis solgt hendes værker og beholdt 70 % af salgsprisen.','Samler. Har forudbetalt 3 mio. kr. for Thorlund-maleriet.','Galleriassistent. Opdagede for en uge siden, at Lindholm havde forfalsket maleriets papirer om ejerhistorik.','Uafhængig vurderingsmand. Har skrevet under på, at maleriet er ægte, og skulle have 10 % af salgsprisen.'],
+['En lille bronzehest fra receptionsdisken, 4 kg.','En fleksibel paletkniv i stål med spids. Fra atelierets værktøjsbord.','Gæsterne fik bourgogne. Lindholm drak af sit eget glas.'],
+['Klimastyret lager i kælderen med kodelås.','Lindholms kontor bag udstillingsrummet. Her blev liget fundet.','Lille værksted i baggården, hvor værker bliver restaureret.']],
+timeline:[['19:00','Den private fremvisning begynder.'],['20:30','De fleste gæster går. Fire bliver.'],['21:30','Lindholm forlader udstillingsrummet sammen med en gæst.'],['21:50','Strømmen går i to minutter.'],['22:15','Ada finder Lindholm på kontoret.']],
+evidence:[[['Sporsikring · Handske','Ved liget lå en hvid bomuldshandske i størrelse S med friske pletter af kadmiumgul oliemaling. Kun to af de tilstedeværende bar hvide handsker den aften: maleren Nora og vurderingsmanden Leif. Begge håndterede værket.','Gerningspersonen er enten Leif, vurderingsmand eller Nora, kunstner.'],
+['Obduktion · Retsmedicinsk Institut','Afdøde har et smalt, 3 cm dybt stiksår under ribbenene. Han er samtidig usædvanligt bleg, og blodprøven er sendt til toksikologisk analyse. Det kan endnu ikke siges, hvilken af delene der var dødelig. Der er ingen knusningsskader.','Mordvåbnet er enten Paletkniv eller Forgiftet vin. Bronzefiguren er udelukket.'],
+['Sporsikring · Sko og bukser','På afdødes sko er der spor af terpentin og maling, som kun findes i atelieret og i depotet, hvor værker står under konservering. Ligpletterne viser, at Lindholm døde et andet sted end på kontoret.','Drabet skete enten i Atelier eller i Depot.']],
+[['Opkaldslog · Centralen','Nora var i videoopkald med en samler i New York fra 21:15 til 22:10. Samleren har sendt skærmoptagelsen, hvor Nora tydeligt sidder i sin lejlighed på Østerbro.','Nora, kunstner kan ikke være gerningspersonen.'],
+['Toksikologi · Retskemisk Afdeling','Blodprøven er ren. Blegheden skyldes blodtab fra stiksåret. Vinen i glasset er almindelig bourgogne.','Forgiftet vin er udelukket som mordvåben.'],
+['Adgangslog · Depotets kodelås','Loggen viser ingen åbning mellem 18:00 og 23:40. Malingssporene kan derfor ikke stamme fra depotet den aften.','Drabet kan ikke være sket i Depot.']]],
+epilogue:'Leif Mortensen havde godkendt et maleri, han vidste var falsk. I atelieret fortalte Lindholm ham, at han ville trække værket tilbage og "lægge alle kort på bordet". Leif greb paletkniven fra værktøjsbordet. Mens strømmen var gået, bar han Lindholm ind på kontoret. Han glemte den ene handske, og på den sad maling fra det falske maleri.',
+headline:'Vurderingsmand anholdt i falsknerisag med dødelig udgang'},
+
+{title:'Arven på herregården',no:'K-1024',when:'Lørdag 24. oktober · ca. 23:00',where:'Lindeskov Gods, Sydfyn',victim:'Carl Wedel-Holm (79), godsejer',
+intro:'Godsejeren bliver fundet død efter en familiemiddag. Testamentet skulle ændres næste morgen.',
+brief:'Familien var samlet på Lindeskov til godsejerens 79-års fødselsdag. Under kaffen fortalte Carl Wedel-Holm, at han næste morgen ville underskrive et nyt testamente sammen med sin advokat. Han sagde ikke, hvad der stod i det. Kl. 23:40 fandt husholdersken ham død i billardstuen. Testamentet lå som aske i pejsen.',
+options:[['Inge, niece','Kurt, advokat','Tove, husholderske','Svend, nevø'],['Papirkniv','Tung bogstøtte','Forgiftet cognac'],['Arbejdsværelse','Vinterhave','Billiardstue']],answer:[0,2,0],
+info:[['Niece og hidtil eneste arving. Har lånt 2 mio. kr. med forventningen om at arve godset som sikkerhed.','Familiens advokat i 30 år. Har forvaltet godsets midler, og ikke altid omhyggeligt.','Husholderske i 40 år. Det gamle testamente gav hende ret til at bo på godset resten af livet.','Nevø. Blev gjort arveløs for ti år siden og håbede, at det nye testamente ville ændre det.'],
+['Papirkniv med skaft af elfenben. Ligger normalt på skrivebordet.','Bogstøtte formet som en løve, 3 kg støbejern.','Godsejerens yndlingscognac fra 1965. Karaffen stod på bakken.'],
+['Godsejerens private værelse. Her lå testamentet i skuffen.','Glasbygning med palmer og orkidéer.','Her blev liget fundet.']],
+timeline:[['19:00','Fødselsdagsmiddag i spisesalen.'],['21:30','Kaffe i salonen. Carl fortæller om det nye testamente.'],['22:15','Carl trækker sig tilbage.'],['22:50','To personer forlader salonen.'],['23:40','Tove finder Carl i billardstuen.']],
+evidence:[[['Vidneforklaring · Chauffør Mikkel Rask','"Klokken ti minutter i elleve rejste to sig fra kortbordet og gik ud: frøken Inge og hr. Kurt. De andre blev siddende sammen med mig, indtil Tove skreg." Mikkel sad i salonen hele aftenen. Hans forklaring bekræftes af Svend og Tove, som giver hinanden alibi.','Gerningspersonen er enten Inge, niece eller Kurt, advokat.'],
+['Obduktion · Retsmedicinsk Institut, Odense','Afdøde har en 2 cm overfladisk snitlæsion på underarmen. Pupillerne og hudfarven tyder på forgiftning, men toksikologien er ikke færdig. Der er ingen hovedskader, så bogstøtten kan udelukkes.','Mordvåbnet er enten Forgiftet cognac eller Papirkniv.'],
+['Teknisk rapport · Kriminalteknisk Center','Under afdødes sko sidder fugtig jord med orkidégødning, og på jakkeærmet er der friske pletter af fyldepennens blæk. Gødningen findes i vinterhaven, blækket i arbejdsværelset. Liget blev flyttet til billardstuen efter døden.','Drabet skete enten i Arbejdsværelse eller i Vinterhave.']],
+[['Mødelog · Centralen','Kurt deltog fra 22:52 til 23:35 i et videomøde med en klient i Hamborg fra godsets bibliotek. Kameraet var tændt hele tiden, og optagelsen er kontrolleret.','Kurt, advokat kan ikke være gerningspersonen.'],
+['Undersøgelse af papirkniven','Papirkniven lå i en aflåst vitrine, og nøglen hang om Toves hals hele aftenen. Snittet på armen stammer fra et knust cognacglas.','Papirkniven er udelukket som mordvåben.'],
+['Gartnerens forklaring','Vinterhaven blev låst kl. 17 af gartneren, som tog nøglen med hjem til Svendborg. Gødningen på skoene stammer fra godsejerens rundtur i haven om eftermiddagen.','Drabet kan ikke være sket i Vinterhave.']]],
+epilogue:'Inge Wedel-Holm vidste, at det nye testamente ville gøre hende arveløs, og at hun så sad tilbage med et lån, hun aldrig kunne betale. Hun hældte rottegift fra stalden i onklens cognac i arbejdsværelset og blev hos ham, til han faldt om. Glasset, hun tabte i panik, skar ham i armen. Bagefter slæbte hun ham ind i billardstuen og brændte testamentet i pejsen.',
+headline:'Niece anholdt for giftmord på fynsk gods'},
+
+{title:'Sidste tog til centralen',no:'K-1107',when:'Lørdag 7. november · ca. 16:20',where:'Sydbanernes Jernbanemuseum, Næstved',victim:'Palle Brix (63), entreprenør',
+intro:'En entreprenør dør på et jernbanemuseum under en donationsoverrækkelse. Kameraerne blev afbrudt med vilje.',
+brief:'Entreprenør Palle Brix skulle overrække 5 mio. kr. til restaureringen af damplokomotivet "Sølvpilen". Ceremonien skulle begynde kl. 17. Kl. 16:12 blev museets kameraer slukket fra kontrolrummet, og kl. 16:50 blev Brix fundet død mellem reolerne i arkivet. Donationsaftalen var aldrig blevet underskrevet.',
+options:[['Asta, kurator','Bent, mekaniker','Else, sponsor','Otto, sekretær'],['Skruenøgle','Signalvægt','Forgiftet vand'],['Arkiv','Vognhal','Værksted']],answer:[1,0,1],
+info:[['Kurator. Brix forlangte, at museet skulle opkaldes efter ham.','Frivillig mekaniker i 20 år. Har brugt tusindvis af timer på "Sølvpilen".','Sponsor fra et konkurrerende firma. Hendes bud var blevet forbigået.','Museets sekretær. Har skrevet donationsaftalen og sneget en paragraf ind, som Brix ikke kendte til.'],
+['En 60 cm skruenøgle fra lokomotivværktøjet. Fundet aftørret i en spand.','Kontravægt fra en gammel semafor, 8 kg.','Vandflasken på talerstolen var halvt tømt.'],
+['Her blev liget fundet, mellem reolerne.','Den store hal med lokomotiverne. Kold, mørk og fuld af kulstøv.','Museets værksted, hvor "Sølvpilen" bliver restaureret.']],
+timeline:[['15:30','Gæsterne ankommer til forhallen.'],['16:00','Brix besigtiger lokomotiverne.'],['16:12','Kameraerne slukkes fra kontrolrummet.'],['16:50','Liget findes i arkivet.'],['17:00','Ceremonien aflyses.']],
+evidence:[[['Vagtlog · Afspærringen til hallerne','Museumsvagten skriver navn og klokkeslæt på alle, der passerer afspærringen. Efter kl. 15:45 står der kun to navne: Bent (15:58) og Else (15:50). Der er ingen anden vej ind til hallerne.','Gerningspersonen er enten Bent, mekaniker eller Else, sponsor.'],
+['Obduktion · Retsmedicinsk Institut','Afdøde døde af en kraftig hovedskade fra en tung metalgenstand. Vandflasken fra talerstolen er analyseret og indeholder almindeligt postevand.','Mordvåbnet er enten Skruenøgle eller Signalvægt. Forgiftet vand er udelukket.'],
+['Teknisk rapport · Kulstøv og olie','Afdødes frakke er fuld af fint kulstøv, og der sidder maskinolie på ærmerne. Støv og olie af samme type findes både i vognhallen og i værkstedet. Arkivet er rent, så liget er flyttet.','Drabet skete enten i Vognhal eller i Værksted.']],
+[['Tv-optagelse · TV Syd','Else blev interviewet live i museets forhal fra 16:05 til 16:40. Optagelsen er tidsstemplet og viser hende uafbrudt i billedet.','Else, sponsor kan ikke være gerningspersonen.'],
+['Undersøgelse af signalvægten','Semaforens kontravægt er nittet fast og har ikke været løsnet siden 1972. Rustlaget er ubrudt.','Signalvægten er udelukket som mordvåben.'],
+['Alarmlog · Værkstedet','Værkstedet var låst og alarmen slået til fra 15:00 til 18:30 på grund af åbent hus. Ingen har været derinde.','Drabet kan ikke være sket i Værksted.']]],
+epilogue:'Bent Hansen havde brugt tyve år af sine weekender på "Sølvpilen". Han slukkede kameraerne for at tale med Brix i fred. I vognhallen fortalte Brix grinende, at lokomotivet skulle sælges til et museum i Tyskland, så snart restaureringen var betalt. Bent slog ham med skruenøglen. Han fragtede liget til arkivet på en bagagevogn, og kulstøvet fulgte med.',
+headline:'Frivillig mekaniker anholdt for drab i lokomotivhal'},
+
+{title:'Den kolde reception',no:'K-1203',when:'Torsdag 3. december · ca. 18:45',where:'Rask & Partnere, Havneholmen, København',victim:'Tobias Rask (47), ejendomsmægler',
+intro:'En ejendomsmægler findes død efter indvielsen af et nyt kontor. Et salg har gjort alle til fjender.',
+brief:'Rask & Partnere indviede deres nye kontor med champagne og kanapeer for 60 gæster. Kl. 18:15 forlod Tobias Rask festen for at "hente nogle papirer". Kl. 19:20 blev han fundet død i trappeopgangen ved nødudgangen. Der var ingen tegn på indbrud. Det var en af gæsterne.',
+options:[['Maja, kollega','Erik, køber','Ulla, bogholder','Hans, partner'],['Glaspris','Brevkniv','Forgiftet champagne'],['Mødelokale','Tagterrasse','Arkiv']],answer:[2,1,2],
+info:[['Kollega. Rask tog æren for hendes største salg nogensinde.','Køber. Betalte 18 mio. kr. for en lejlighed med skjult skimmelsvamp.','Bogholder i 15 år. Rask havde fået hende til at bogføre deponerede købesummer som indtægt, og nu ville han lægge skylden på hende.','Partner. Ville købe Rask ud før en kommende fusion.'],
+['En glasstatuette med teksten "Årets Mægler".','En slank brevkniv i stål fra receptionen.','Rask skålede med alle gæsterne.'],
+['Mødelokale med glasvægge ud mod receptionen.','Terrasse med udsigt over havnen, hvor talerne blev holdt.','Rum uden vinduer med reoler fulde af sagsmapper.']],
+timeline:[['17:00','Receptionen åbner.'],['18:15','Rask forlader festen.'],['18:25','Talerne begynder på tagterrassen.'],['19:05','Talerne slutter.'],['19:20','Rask findes i trappeopgangen.']],
+evidence:[[['Adgangslog · Nøglekort, 4. sal','Kontorets bageste del, hvor Rask gik hen, kræver nøglekort. Mellem 18:10 og 19:00 blev kun to kort brugt: Ullas (18:31) og Hans’ (18:17). Ingen andre gæster havde adgang.','Gerningspersonen er enten Ulla, bogholder eller Hans, partner.'],
+['Obduktion · Retsmedicinsk Institut','Afdøde har et smalt stiksår i halsen og skum ved munden, som kan tyde på forgiftning. Der er ingen glassplinter eller knusningsskader. Dødstidspunktet er mellem 18:35 og 18:55.','Mordvåbnet er enten Brevkniv eller Forgiftet champagne. Glasprisen er udelukket.'],
+['Teknisk rapport · Støvanalyse','På afdødes jakke er der papirstøv og tonerpulver fra en printer. Begge dele findes i arkivet og i mødelokalet, hvor kontorets store printer står. Liget er flyttet til trappeopgangen efter døden.','Drabet skete enten i Arkiv eller i Mødelokale.']],
+[['Videooptagelser · Gæsternes telefoner','Hans holdt tale på tagterrassen fra 18:25 til 19:05. Mindst seks gæster har filmet hele talen, og han er i billedet hele tiden.','Hans, partner kan ikke være gerningspersonen.'],
+['Toksikologi · Retskemisk Afdeling','Skummet ved munden skyldes væske i lungerne efter stiksåret. Champagneglasset og blodprøven er rene.','Forgiftet champagne er udelukket som mordvåben.'],
+['Overvågningskamera · Receptionen','Mødelokalet har glasvægge ud mod receptionen, som kameraet filmede hele aftenen. Ingen gik ind i lokalet efter kl. 17.','Drabet kan ikke være sket i Mødelokale.']]],
+epilogue:'Ulla Kjeldsen opdagede, at Rask havde skrevet en mail til politiet, der gav hende skylden for hans svindel. Hun konfronterede ham i arkivet, hvor han var ved at makulere bilag. Brevkniven havde hun taget fra receptionen for at åbne en kasse med mapper. Bagefter trak hun ham ud i trappeopgangen, så det skulle ligne et overfald udefra.',
+headline:'Bogholder sigtet for drab på mægler'},
+
+{title:'Døden på kurset',no:'K-0115',when:'Fredag 15. januar · ca. 14:35',where:'Kursuscenter Fjordbakken, Vejle',victim:'Merete Vinge (52), kursusleder og erhvervspsykolog',
+intro:'En kursusleder findes død under et seminar om tillid. Deltagerne har overraskende lidt tillid til hinanden.',
+brief:'Seminaret "Tillid på arbejdspladsen" var nået til eftermiddagens øvelse: "Fald baglæns, og stol på, at nogen griber dig." Kl. 15:05 blev kursusleder Merete Vinge fundet død i plenumsalen. Ingen havde grebet hende. Vinge havde netop skrevet en rapport om ledelsen i en stor virksomhed, og den nævnte navne.',
+options:[['Alma, konsulent','Niels, arrangør','Dorte, underviser','Jens, direktør'],['Tung vase','Papirskærer','Forgiftet kaffe'],['Grupperum','Lounge','Kontor']],answer:[3,2,0],
+info:[['Konsulent. Vinge havde stjålet hendes kursuskoncept og solgt det som sit eget.','Arrangør. Kursuscentret er tæt på konkurs, og Vinge truede med at aflyse alle fremtidige seminarer.','Medunderviser og tidligere Vinges partner, både privat og i forretningen.','Direktør. Vinges rapport kaldte hans ledelse "frygtbaseret" og skulle sendes til bestyrelsen mandag.'],
+['Krystalvase fra loungen, 3 kg.','Papirskærer med guillotine fra kontoret.','Eftermiddagskaffen blev skænket fra kander i grupperummene.'],
+['Lille rum med whiteboard og flipovers.','Lounge med sofaer og pejs.','Kursuscentrets administration.']],
+timeline:[['09:00','Seminaret begynder.'],['13:00','Frokost i loungen ved pejsen.'],['14:15','Deltagerne fordeles i grupperum.'],['14:30','Eftermiddagskaffen serveres.'],['15:05','Vinge findes i plenumsalen.']],
+evidence:[[['Sporsikring · Nøglebånd','Under Vinges hånd lå et clips fra et rødt nøglebånd. Den type fik kun VIP-deltagere udleveret. Kun to deltagere havde røde nøglebånd: Jens og Alma.','Gerningspersonen er enten Jens, direktør eller Alma, konsulent.'],
+['Obduktion · Retsmedicinsk Institut, Aarhus','Der er et blåt mærke på skulderen, som kan stamme fra et slag med en tung genstand, og samtidig tegn på forgiftning. Der er ingen snitlæsioner, så papirskæreren kan udelukkes. Den endelige dødsårsag afventer analyse.','Mordvåbnet er enten Forgiftet kaffe eller Tung vase.'],
+['Teknisk rapport · Tusch og aske','På Vinges fingre er der grøn whiteboard-tusch, og på kjolen sidder aske fra en pejs. Tuschen findes i grupperummene, asken i loungen. Hun døde ikke i plenumsalen; hun nåede at gå derind.','Drabet skete enten i Grupperum eller i Lounge.']],
+[['Opkaldslog · Centralen','Alma var i videoopkald med sin datters skole fra 14:20 til 15:00 fra sin bil på parkeringspladsen. Opkaldet er registreret i skolens system, og kameraet viser hende hele tiden.','Alma, konsulent kan ikke være gerningspersonen.'],
+['Undersøgelse af vasen','Krystalvasen står uskadt med blomster og vand, som ifølge rengøringen ikke er rørt siden morgenen. Det blå mærke stammer fra faldøvelsen.','Den tunge vase er udelukket som mordvåben.'],
+['Rengøringsplan · Loungen','Loungen var låst og lukket for rengøring fra 14:00 til 16:00. Asken på kjolen stammer fra frokosten ved pejsen.','Drabet kan ikke være sket i Lounge.']]],
+epilogue:'Direktør Jens Halberg vidste, at Vinges rapport ville koste ham jobbet. I grupperummet hældte han sin kones hjertemedicin i Vinges kaffekop, mens hun stod ved whiteboardet. Hun nåede ind i plenumsalen, før hun faldt om midt i en faldøvelse, og ingen greb hende. I faldet havde hun revet hans røde clips af.',
+headline:'Direktør anholdt: tillidskursus endte i drab'}
+];
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='kriminalkludder-solo-v1',CAT=['Mistænkte','Mordvåben','Gerningssteder'],FIELD=['s','w','l'];
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// ── Supabase (valgfri). Udfyld projektets URL og den offentlige anon-nøgle for at slå online-gemning og rangliste til.
+// Tomme felter = spillet kører helt offline som før. Databasen sættes op med supabase-setup.sql.
+const SUPA={url:'',key:''};
+const CODEKEY='kriminalkludder-kode',UUIDRE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const online=()=>!!(SUPA.url&&SUPA.key);
+let cloudTimer,cloudState='',ranking=null,myCode;
+function uuid(){if(crypto.randomUUID)return crypto.randomUUID();const b=crypto.getRandomValues(new Uint8Array(16));b[6]=b[6]&15|64;b[8]=b[8]&63|128;const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join('');return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);}
+try{myCode=localStorage.getItem(CODEKEY);}catch(e){}
+if(!myCode||!UUIDRE.test(myCode)){myCode=uuid();try{localStorage.setItem(CODEKEY,myCode);}catch(e){}}
+async function rpc(fn,args){const r=await fetch(SUPA.url.replace(/\/$/,'')+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.key,Authorization:'Bearer '+SUPA.key,'Content-Type':'application/json'},body:JSON.stringify(args)});if(!r.ok)throw Error('Supabase svarede '+r.status);const t=await r.text();return t?JSON.parse(t):null;}
+function setCloud(s){cloudState=s;const el=document.getElementById('cloudState');if(el)el.textContent=s;}
+function cloudQueue(){if(!online())return;clearTimeout(cloudTimer);setCloud('Gemmer …');cloudTimer=setTimeout(cloudPush,1500);}
+async function cloudPush(){try{await rpc('detektiv_save',{p_code:myCode,p_name:game.name,p_data:{...game,current:null}});setCloud('Gemt online kl. '+new Date().toLocaleTimeString('da-DK',{hour:'2-digit',minute:'2-digit'}));loadRanking();}catch(e){setCloud('Ingen forbindelse – gemt lokalt');}}
+async function cloudPull(code){const d=await rpc('detektiv_load',{p_code:code});if(!d)return null;const g={...d,current:null};return validGame(g)?g:null;}
+async function cloudBoot(){if(!online())return;try{const g=await cloudPull(myCode);if(g&&g.solved.length>game.solved.length){game=g;try{localStorage.setItem(KEY,JSON.stringify(game));}catch(e){}draw();toast('Fremskridt hentet fra serveren.');}setCloud('Forbundet til serveren');}catch(e){setCloud('Ingen forbindelse – gemt lokalt');}loadRanking();}
+async function loadRanking(){if(!online())return;try{ranking=await rpc('detektiv_toplist',{});}catch(e){ranking=null;}const el=document.getElementById('ranking');if(el)el.innerHTML=rankingHtml();}
+function rankingHtml(){if(!ranking)return '<p class="hint">Ranglisten kunne ikke hentes lige nu.</p>';if(!ranking.length)return '<p class="hint">Ingen på listen endnu. Bliv den første!</p>';return '<ol class="rank">'+ranking.map((r,i)=>`<li style="animation-delay:${i*50}ms"><span>${['🥇','🥈','🥉'][i]||(i+1)+'.'}</span><b>${esc(r.name)}</b><span>${+r.solved}/${CASES.length} sager · ${+r.attempts} forsøg</span></li>`).join('')+'</ol>';}
+function onlineBox(){if(!online())return '';return `<div class="online"><div><h3>🏆 Detektivernes rangliste</h3><div id="ranking">${ranking?rankingHtml():'<p class="hint">Henter …</p>'}</div><p class="hint">Flest opklarede sager vinder. Ved lighed vinder færrest forsøg.</p></div><div><h3>☁ Online-gemning</h3><p class="small" id="cloudState">${esc(cloudState||'Forbinder …')}</p><p class="hint">Din detektivkode. Gem den, så kan du fortsætte på en anden enhed.</p><code class="code">${esc(myCode)}</code><div class="actions"><button id="copyCode" class="secondary">Kopiér kode</button></div><label for="otherCode">Fortsæt fra en anden enhed</label><input id="otherCode" placeholder="Indsæt detektivkode" autocomplete="off"><div class="actions"><button id="useCode" class="secondary">Hent fremskridt</button></div></div></div>`;}
+function bindOnline(){if(!online())return;if(!ranking)loadRanking();$('copyCode').onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(myCode):Promise.reject()).then(()=>toast('Koden er kopieret.'),()=>toast('Din kode: '+myCode));};$('useCode').onclick=async()=>{const c=$('otherCode').value.trim();if(!UUIDRE.test(c)){toast('Det ligner ikke en detektivkode.');return;}try{const g=await cloudPull(c);if(!g){toast('Ingen fremskridt fundet med den kode.');return;}if(!confirm('Erstat fremskridtet på denne enhed med det, der hører til koden?'))return;myCode=c;try{localStorage.setItem(CODEKEY,c);}catch(e){}game=g;save();draw();toast('Fremskridt hentet.');}catch(e){toast('Kunne ikke kontakte serveren.');}};}
+const fresh=()=>({version:1,current:null,name:'Detektiv',solved:[],reports:{},attempts:{},struck:{},notes:{}});
+let game=fresh(),tab='beviser',notifyTimer;const typed=new Set();
+function validGame(g){const okId=n=>Number.isInteger(n)&&n>=0&&n<CASES.length;return !!g&&g.version===1&&(g.current===null||okId(g.current))&&typeof g.name==='string'&&Array.isArray(g.solved)&&g.solved.every(okId)&&['reports','attempts','struck','notes'].every(k=>g[k]&&typeof g[k]==='object');}
+try{const v=JSON.parse(localStorage.getItem(KEY)||'null');if(validGame(v))game=v;}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(game));}catch(e){toast('Lokal lagring er blokeret. Hent en sikkerhedskopi.');}status();cloudQueue();}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('hidden');void el.offsetWidth;el.classList.remove('hidden');clearTimeout(notifyTimer);notifyTimer=setTimeout(()=>el.classList.add('hidden'),4500);}
+function status(){$('status').textContent=game.solved.length+' / '+CASES.length+' opklaret';$('status').classList.toggle('live',game.solved.length===CASES.length);}
+function blankReport(){return {s:'',w:'',l:'',why:'',result:''};}
+function reportObj(){const id=game.current;return game.reports[id]||(game.reports[id]=blankReport());}
+function openCase(id){game.current=id;tab='beviser';save();draw();scrollTo(0,0);}
+function struckList(){return game.struck[game.current]||[];}
+// For hver kategori: indeks på den eneste ikke-overstregede mulighed, ellers null.
+function remaining(){const c=CASES[game.current],st=struckList();return c.options.map((arr,i)=>{const left=arr.map((_,k)=>k).filter(k=>!st.includes(i+'-'+k));return left.length===1?left[0]:null;});}
+function initials(n){return n.split(',')[0].trim().slice(0,2).toUpperCase();}
+
+function typeIn(el,html,text,delay){if(RM){el.innerHTML=html+esc(text);return;}el.innerHTML=html+'<span class="t"></span><span class="caret"></span>';const t=el.querySelector('.t');let i=0;setTimeout(function step(){if(!el.isConnected)return;t.textContent=text.slice(0,++i);if(i<text.length)setTimeout(step,14+Math.random()*26);else{const c=el.querySelector('.caret');c&&c.remove();}},delay);}
+
+function draw(){status();closeOverlay();if(game.current===null){archive();return;}const c=CASES[game.current],solved=game.solved.includes(game.current);$('app').innerHTML=`<section class="panel" id="panel"><div class="topline" style="display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;align-items:center"><div><div class="eyebrow">Sag ${game.current+1} · ${esc(c.no)} · ${solved?'OPKLARET':'ÅBEN'}</div><h2 style="margin:4px 0 0">${esc(c.title)}</h2></div><span class="badge">🕵 ${esc(game.name)}</span></div>
+<div class="dossier"><b>Offer</b><span>${esc(c.victim)}</span><b>Tidspunkt</b><span>${esc(c.when)}</span><b>Adresse</b><span>${esc(c.where)}</span></div>
+<p class="brief">${esc(c.brief)}</p>
+<div class="actions"><button id="archive" class="secondary">← Sagsarkiv</button><button id="backup" class="secondary">Gem sikkerhedskopi</button></div>
+<nav>${[['beviser','Sagsmappen'],['kartotek','Kartotek'],['tidslinje','Tidslinje'],['notes','Notesbog'],['report','Anklage'],['help','Hjælp']].map(([k,l])=>`<button data-tab="${k}" class="${tab===k?'active':''}">${l}</button>`).join('')}</nav><div id="content"></div></section>`;
+$('archive').onclick=()=>{game.current=null;save();draw();scrollTo(0,0);};$('backup').onclick=backup;document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;draw();});
+({beviser:showEvidence,kartotek:showFiles,tidslinje:showTimeline,notes:showNotes,report:showReport,help:showHelp})[tab](c);}
+
+function doc(e,cls,i,key){return `<article class="evidence ${cls}" style="--i:${i}"><h3>${esc(e.kind)}</h3><div class="src">${esc(e[0])}</div><p>${esc(e[1])}</p><div class="concl" data-key="${key}" data-text="${esc(e[2])}"></div></article>`;}
+
+function showEvidence(c){const kinds=['Personspor','Våbenspor','Stedspor'];
+$('content').innerHTML=`<div class="cols"><div><h3 class="sec-title">Feltrapporter</h3>${c.evidence[0].map((t,i)=>doc(Object.assign([...t],{kind:kinds[i]}),'field',i,game.current+'f'+i)).join('')}<h3 class="sec-title">Fra centralen</h3>${c.evidence[1].map((t,i)=>doc(Object.assign([...t],{kind:kinds[i]}),'central',i+3,game.current+'c'+i)).join('')}</div><aside class="board" id="board"></aside></div>`;
+document.querySelectorAll('.concl').forEach((el,i)=>{const k=el.dataset.key,txt=el.dataset.text,lab='<span class="lab">KONKLUSION: </span>';if(typed.has(k)){el.innerHTML=lab+esc(txt);}else{typed.add(k);typeIn(el,lab,txt,450+i*350);}});
+drawBoard(c);}
+
+function drawBoard(c){const st=struckList(),rem=remaining(),all=rem.every(x=>x!==null);
+$('board').innerHTML=`<h3>Udelukkelsestavle</h3><p class="hint">Tryk på en mulighed for at strege den ud. Tryk igen for at fortryde. Når der kun er én tilbage, bliver den ringet ind.</p>${c.options.map((arr,i)=>`<h4>${CAT[i]}</h4>${arr.map((v,k)=>{const on=st.includes(i+'-'+k);return `<button class="opt ${on?'struck':''} ${rem[i]===k?'last':''}" data-opt="${i}-${k}" aria-pressed="${on}">${esc(v)}<svg class="ring" viewBox="0 0 200 50" preserveAspectRatio="none" aria-hidden="true"><path d="M14,30 C8,8 186,2 194,22 C200,44 24,52 8,32 C2,22 30,8 70,6"/></svg></button>`;}).join('')}`).join('')}${all?'<div class="ready">🔎 Der er én tilbage i hver kategori. Sagen er klar til anklage.</div>':'<p class="notice" style="color:#302b29">Alle oplysninger er pålidelige. Når der kun er én mulighed tilbage i hver kategori, kan du rejse anklagen.</p>'}<div class="actions"><button id="toReport" class="${all?'big':''}">Gå til anklagen</button></div>`;
+document.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>{const id=game.current,list=game.struck[id]||(game.struck[id]=[]),k=b.dataset.opt,at=list.indexOf(k);if(at<0)list.push(k);else list.splice(at,1);save();const wasAll=remaining().every(x=>x!==null);drawBoard(c);const nb=document.querySelector(`[data-opt="${k}"]`);if(nb&&at<0){nb.classList.add('scratch');}});
+$('toReport').onclick=()=>{tab='report';draw();scrollTo({top:0,behavior:RM?'auto':'smooth'});};}
+
+function showFiles(c){const st=struckList(),labels=['Mistænkte','Mulige mordvåben','Mulige gerningssteder'];let n=0;
+$('content').innerHTML=c.options.map((arr,i)=>`<h3 class="sec-title">${labels[i]}</h3><div class="files">${arr.map((v,k)=>{const on=st.includes(i+'-'+k);const [name,role]=v.split(',');return `<div class="file ${on?'struck':''}" style="--i:${n++}"><div class="who">${i===0?`<div class="avatar">${esc(initials(v))}</div>`:''}<div><h4>${esc(name)}</h4>${role?`<div class="small">${esc(role.trim())}</div>`:''}</div></div><p>${esc(c.info[i][k])}</p>${on?'<span class="xstamp">UDELUKKET</span>':''}</div>`;}).join('')}</div>`).join('')+'<p class="hint">Overstregninger fra udelukkelsestavlen vises også her.</p>';}
+
+function showTimeline(c){$('content').innerHTML=`<h3>Aftenens forløb</h3><div class="timeline">${c.timeline.map((t,i)=>`<div class="tl" style="--i:${i}"><b>${esc(t[0])}</b>${esc(t[1])}</div>`).join('')}</div><p class="hint">Tidslinjen er sat sammen ud fra vidneforklaringer. Den afgør ikke sagen alene.</p>`;}
+
+function showNotes(){$('content').innerHTML=`<h3>Din notesbog</h3><label for="notes">Noter til denne sag</label><textarea id="notes">${esc(game.notes[game.current]||'')}</textarea><p class="small">Noterne gemmes på denne enhed og følger med sikkerhedskopien.</p>`;$('notes').oninput=()=>{game.notes[game.current]=$('notes').value;save();};}
+
+function showReport(){const r=reportObj(),c=CASES[game.current],done=r.result==='ok',st=struckList(),auto=[false,false,false];
+if(!done){const rem=remaining();FIELD.forEach((f,i)=>{if(rem[i]!==null&&r[f]!==String(rem[i])){r[f]=String(rem[i]);auto[i]=true;if(r.result==='wrong')r.result='';}else if(rem[i]!==null)auto[i]=true;});save();}
+$('content').innerHTML=`<div class="accuse"><h3 style="margin-top:0">Anklage til politimesteren</h3><p>Vælg én gerningsperson, ét våben og ét sted. Forkerte anklager tæller som ekstra forsøg.</p>${c.options.map((arr,i)=>`<div class="group"><h4>${['Gerningsperson','Mordvåben','Gerningssted'][i]}${!done&&auto[i]?'<span class="auto">FORVALGT FRA TAVLEN</span>':''}</h4><div class="chips" role="radiogroup">${arr.map((v,k)=>{const sel=String(r[FIELD[i]])===String(k);return `<button class="chip ${sel?'sel':''} ${st.includes(i+'-'+k)?'struck':''}" role="radio" aria-checked="${sel}" data-pick="${i}-${k}" ${done?'disabled':''}>${esc(v)}</button>`;}).join('')}</div></div>`).join('')}
+<div class="actions"><button id="submit" class="big" ${done?'disabled':''}>${done?'Sagen er lukket':'Indsend anklagen'}</button>${done?'<button id="paper" class="secondary">Læs avisen igen</button>':''}${done&&nextOpen()!==null?'<button id="next" class="secondary">Næste åbne sag →</button>':''}</div>
+<div class="notice ${done?'success':r.result==='wrong'?'error':''}" role="status">${done?'Sagen er opklaret! Politimesteren er overrasket, men tilfreds.':r.result==='wrong'?'Anklagen er sendt retur. Mindst ét valg strider mod beviserne.':'Afventer din vurdering.'}</div><p class="small">Antal forsøg: ${game.attempts[game.current]||0}</p>${done?`<div class="solution"><div class="eyebrow">Sådan skete det</div><p style="margin-bottom:0">${esc(c.epilogue)}</p></div>`:''}</div>`;
+document.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{const [i,k]=b.dataset.pick.split('-');r[FIELD[i]]=k;if(r.result==='wrong')r.result='';save();b.closest('.chips').querySelectorAll('.chip').forEach(x=>{const on=x===b;x.classList.toggle('sel',on);x.setAttribute('aria-checked',on);});});
+$('submit').onclick=()=>{if(FIELD.some(k=>r[k]==='')){toast('Vælg både gerningsperson, våben og sted.');return;}const id=game.current;game.attempts[id]=(game.attempts[id]||0)+1;const ok=FIELD.every((k,i)=>+r[k]===c.answer[i]);r.result=ok?'ok':'wrong';if(ok&&!game.solved.includes(id))game.solved.push(id);save();stamp(ok,()=>{draw();if(ok)newspaper(id);else{const p=$('panel');p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake');toast('Forkert. Se beviserne igennem igen.');}});};
+if($('paper'))$('paper').onclick=()=>newspaper(game.current);
+if($('next'))$('next').onclick=()=>openCase(nextOpen());}
+
+function overlay(html){closeOverlay();const o=document.createElement('div');o.id='overlay';o.innerHTML=html;document.body.appendChild(o);return o;}
+function closeOverlay(){const o=$('overlay');o&&o.remove();}
+function stamp(ok,then){const o=overlay(`<div class="stamp ${ok?'ok':'bad'}">${ok?'OPKLARET':'AFVIST'}</div>`);thud();setTimeout(()=>{closeOverlay();then();},RM?600:1300);}
+function newspaper(id){const c=CASES[id],a=game.attempts[id]||1,d=new Date().toLocaleDateString('da-DK',{weekday:'long',day:'numeric',month:'long'});const o=overlay(`<div class="newspaper" role="dialog" aria-label="Avisforside"><div class="mast">Kriminal-Tidende</div><div class="dateline"><span>${esc(d)}</span><span>Ekstraudgave · 12 kr.</span></div><h2>${esc(c.headline)}</h2><p class="small" style="margin:0 0 10px"><b>${esc(game.name)} lukker sag ${esc(c.no)} efter ${a} ${a===1?'forsøg':'forsøg'}</b></p><div class="lede">${esc(c.epilogue)}</div><div class="actions">${nextOpen()!==null?'<button id="npNext">Næste sag →</button>':''}<button id="npClose" class="secondary">Luk avisen</button></div></div>`);o.onclick=e=>{if(e.target===o)closeOverlay();};$('npClose').onclick=closeOverlay;if($('npNext'))$('npNext').onclick=()=>{closeOverlay();openCase(nextOpen());};if(game.solved.length===CASES.length)setTimeout(()=>toast('Alle otte sager er lukket. Politimesteren overvejer at give dig et skilt.'),1200);}
+
+// Lille syntetisk stempel-lyd (ingen filer).
+let actx;function thud(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime,o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(40,t+.18);g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.26);}catch(e){}}
+
+function showHelp(){$('content').innerHTML=`<h3>Alene på sagen</h3><ol><li>Læs sagsmappen: tre feltrapporter og tre meldinger fra centralen.</li><li>Slå op i kartoteket for at læse om de mistænkte, våbnene og stederne.</li><li>Streg muligheder ud på udelukkelsestavlen.</li><li>Rejs anklagen. Er der kun én mulighed tilbage i en kategori, er den allerede valgt for dig.</li><li>Er anklagen forkert, bliver den sendt retur, og du kan prøve igen.</li></ol><details><summary>Tip til deduktionen</summary><p>Feltrapporterne indsnævrer hver kategori til to muligheder. Centralen udelukker den ene af dem. Tidslinjen og kartoteket giver stemning, men ingen af dem modsiger beviserne.</p></details>`;}
+
+function nextOpen(){for(let k=1;k<=CASES.length;k++){const i=((game.current??-1)+k)%CASES.length;if(!game.solved.includes(i))return i;}return null;}
+
+function archive(){const all=game.solved.length===CASES.length;$('app').innerHTML=`<section class="panel"><div class="eyebrow">Kriminalkludder · Sagsarkiv</div><h1>Én detektiv.<br>Hele hovedpinen.</h1><p>Makkeren er sygemeldt. Nu er det dig, otte sagsmapper og en kold kop kaffe. Regnen slår mod vinduet. Telefonen har ikke ringet i en time.</p><label for="name">Dit detektivnavn</label><input id="name" maxlength="35" value="${esc(game.name)}"><p>${game.solved.length} / ${CASES.length} sager opklaret.${all?' Alle sager er lukket. Politimesteren overvejer at give dig et skilt.':''}</p><div class="cards">${CASES.map((c,i)=>{const s=game.solved.includes(i),a=game.attempts[i]||0;return `<article class="card ${s?'done':''}" style="--i:${i}">${s?'<span class="cardstamp">OPKLARET</span>':''}<div class="eyebrow">Sag ${i+1} · ${esc(c.no)}</div><h3 style="margin:6px 0">${esc(c.title)}</h3><div class="victim">✝ ${esc(c.victim)}<br>⌖ ${esc(c.where)}</div><p>${esc(c.intro)}</p>${s?`<p class="small">Opklaret · ${a} forsøg</p>`:a?`<p class="small">${a} forkerte forsøg indtil nu</p>`:''}<button data-case="${i}" class="${s?'secondary':''}">${s?'Genlæs sagen':a||game.reports[i]||game.struck[i]?'Fortsæt sagen':'Åbn sagen'}</button></article>`;}).join('')}</div>${onlineBox()}<div class="actions"><button id="backup" class="secondary">Gem sikkerhedskopi</button><button id="load" class="secondary">Indlæs sikkerhedskopi</button><button id="reset" class="secondary">Start forfra</button></div><p class="hint">Fremskridt gemmes automatisk i denne browser. Sikkerhedskopier fra to-iPad-udgaven kan også indlæses.</p></section>`;
+document.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>openCase(+b.dataset.case));$('name').oninput=()=>{game.name=$('name').value.trim()||'Detektiv';save();};$('backup').onclick=backup;$('load').onclick=()=>$('import').click();$('reset').onclick=()=>{if(!confirm('Slet alle fremskridt, noter og anklager på denne enhed?'))return;game=fresh();save();draw();toast('Arkivet er nulstillet.');};bindOnline();}
+
+function download(text,name,type){const u=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),3000);}
+function backup(){save();download(JSON.stringify({format:'kriminalkludder-solo',game},null,2),'kriminalkludder-solo-sikkerhedskopi.json','application/json');}
+
+// Indlæsning: egen udgave, to-iPad-udgaven (v2) og den ældre otte-sagers udgave (v1).
+function fromCoop(name,solved,attempts,reports,notes){const g=fresh();const okId=n=>Number.isInteger(+n)&&+n>=0&&+n<CASES.length;g.name=typeof name==='string'&&name?name.slice(0,35):'Detektiv';g.solved=(Array.isArray(solved)?solved:[]).filter(n=>Number.isInteger(n)&&okId(n));for(const [id,a] of Object.entries(attempts||{}))if(okId(id)&&Number.isInteger(a))g.attempts[id]=a;for(const [id,r] of Object.entries(reports||{}))if(okId(id)&&r&&typeof r==='object'){const b=blankReport();FIELD.forEach(k=>{if(typeof r[k]==='string')b[k]=r[k];});if(typeof r.why==='string')b.why=r.why;if(g.solved.includes(+id))b.result='ok';g.reports[id]=b;}for(const [k,t] of Object.entries(notes||{})){const id=String(k).split('-')[0];if(okId(id)&&typeof t==='string'&&t.trim())g.notes[id]=(g.notes[id]?g.notes[id]+'\n\n':'')+t;}return g;}
+$('import').onchange=async e=>{try{const f=e.target.files[0];if(!f)return;if(f.size>2000000)throw Error('Filen er for stor.');const v=JSON.parse(await f.text());let g;if(v.format==='kriminalkludder-solo')g=v.game;else if(v.format==='kriminalkludder-coop'&&v.game&&v.game.version===2)g=fromCoop(v.game.names?.[0],v.game.solved,v.game.attempts,v.game.reports,v.notes);else if(v.version===1&&Array.isArray(v.solved))g=fromCoop(v.names?.[0],v.solved,v.attempts,v.drafts,v.notes);if(!validGame(g))throw Error('Ugyldig sikkerhedskopi.');if(!confirm('Erstat de lokale fremskridt med denne kopi?'))return;g.current=null;game=g;save();draw();toast('Sikkerhedskopi indlæst.');}catch(err){toast(err.message||'Kunne ikke læse filen.');}finally{e.target.value='';}};
+
+// Effekter: regn, lyn og skrivemaskine-tagline.
+(function(){const cv=$('fx'),ctx=cv.getContext('2d');let W,H,D,drops=[];
+function mk(any){return{x:Math.random()*W*1.2,y:any?Math.random()*H:-40*D,l:(10+Math.random()*24)*D,v:(8+Math.random()*10)*D,a:.06+Math.random()*.16};}
+function size(){D=Math.min(devicePixelRatio||1,2);W=cv.width=innerWidth*D;H=cv.height=innerHeight*D;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';drops=Array.from({length:Math.min(160,Math.round(innerWidth/8))},()=>mk(true));}
+function tick(){ctx.clearRect(0,0,W,H);ctx.lineWidth=D;for(const d of drops){ctx.strokeStyle='rgba(200,215,228,'+d.a+')';ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-d.l*.2,d.y+d.l);ctx.stroke();d.y+=d.v;d.x-=d.v*.2;if(d.y>H)Object.assign(d,mk(false));}requestAnimationFrame(tick);}
+size();addEventListener('resize',size);if(!RM){tick();(function bolt(){setTimeout(()=>{const f=$('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on');bolt();},18000+Math.random()*30000);})();}
+const line='Én detektiv. Ingen makker at give skylden.';const el=$('tagline');if(RM)el.textContent=line;else{let i=0;(function step(){el.textContent=line.slice(0,++i);if(i<line.length)setTimeout(step,45+Math.random()*60);})();}})();
+draw();cloudBoot();
+</script></body></html>
