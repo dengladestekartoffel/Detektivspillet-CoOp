@@ -1,0 +1,11 @@
+# Udgiver spillet med GitLab Pages, hver gang main ændres.
+pages:
+  image: alpine:latest
+  script:
+    - mkdir -p public
+    - cp -r index.html Detektivspillet.html spor.js cases public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
