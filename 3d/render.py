@@ -6,15 +6,19 @@
 #   node 3d/jobs.js 9            # vælg sager
 #   python 3d/render.py          # tegn det, der mangler
 #   python 3d/render.py --alt    # tegn alt igen
+#   python 3d/render.py --kun p  # kun portrætter (p, ph, cc, f)
 # Eller med Blender selv: blender -b -P 3d/render.py -- --alt
 import bpy, json, math, os, sys, random
 from mathutils import Vector
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, 'art')
+CACHE = os.path.join(ROOT, '3d', 'cache')
+os.makedirs(CACHE, exist_ok=True)
 ARGS = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:]
 REDO = '--alt' in ARGS
 SAMPLES = 64
+SKIN_IDX = {c: i for i, c in enumerate(['#f3d6bd', '#e9c19f', '#d6a27a', '#b37c54', '#8c5b3b', '#5f3c27'])}
 
 # ── Hjælpere ─────────────────────────────────────────────────────────────────
 def lin(h):
@@ -146,128 +150,313 @@ def shoot(name):
     os.remove(png)
     return name + '.webp'
 
-# ── Portræt (buste set forfra, gennemsigtig baggrund) ──────────────────────────
+# ── Portræt med MakeHuman (MPFB2) ─────────────────────────────────────────────
+# Kræver MPFB2 installeret som Blender-udvidelse og MakeHumans "system assets" (CC0).
+# Se 3d/README.md. Personen bygges ud fra beskrivelsen i sagen: køn, alder, hudfarve,
+# frisure, hårfarve, skæg, briller, øreringe, krave og tøjfarve.
+_MH = {}
+def mh():
+    import importlib
+    bpy.ops.preferences.addon_enable(module='bl_ext.user_default.mpfb')   # skal på igen efter hver nulstilling
+    if not _MH:
+        P = 'bl_ext.user_default.mpfb.services.'
+        _MH['HS'] = importlib.import_module(P + 'humanservice').HumanService
+        _MH['AS'] = importlib.import_module(P + 'assetservice').AssetService
+        _MH['TS'] = importlib.import_module(P + 'targetservice').TargetService
+        _MH['LS'] = importlib.import_module(P + 'locationservice').LocationService
+    return _MH['HS'], _MH['AS']
+
+def face_targets(h, rnd, f, age):
+    # Giv hvert ansigt sit eget præg med små, tilfældige justeringer.
+    import glob
+    TS, root = _MH['TS'], _MH['LS'].get_mpfb_data('targets')
+    pool = []
+    for cat in ('head', 'chin', 'nose', 'mouth', 'forehead', 'eyebrows', 'neck'):
+        files = sorted(fn for fn in glob.glob(os.path.join(root, cat, '*.target.gz')) if not os.path.basename(fn)[:2] in ('l-', 'r-'))
+        pool += [fn for fn in files if 'trans' not in fn]
+    picks = rnd.sample(pool, 9)
+    if not f:
+        picks += [os.path.join(root, 'chin', 'chin-width-incr.target.gz'), os.path.join(root, 'head', 'head-square.target.gz')]
+    seen = set()
+    if age > 35:   # alder i ansigtet: poser under øjnene og ældre hovedform
+        a = min(1.0, (age - 35) / 35)
+        TS.load_target(h, os.path.join(root, 'head', 'head-age-incr.target.gz'), weight=a)
+        for side in 'lr':
+            TS.load_target(h, os.path.join(root, 'eyes', side + '-eye-bag-incr.target.gz'), weight=a * 0.8)
+        seen.add(os.path.join(root, 'head', 'head-age-incr.target.gz'))
+    for fn in picks:
+        if fn in seen or not os.path.exists(fn):
+            continue
+        seen.add(fn)
+        TS.load_target(h, fn, weight=rnd.uniform(0.25, 0.6))
+
+ETH = ['caucasian', 'caucasian', 'caucasian', 'asian', 'african', 'african']
+RACE = [(1, 0, 0), (1, 0, 0), (.75, .25, 0), (.2, .8, 0), (.1, .1, .8), (0, 0, 1)]   # (kaukasisk, asiatisk, afrikansk)
+HAIR = {'short': ('short02', 'short03'), 'bob': ('bob01', 'long01'), 'long': ('long01', 'long01'), 'bun': ('ponytail01', 'ponytail01'), 'curly': ('afro01', 'afro01')}
+
+def years(p):
+    import re
+    m = re.search(r'\((\d{1,3})\)', p['name'])
+    if m:
+        return int(m.group(1))
+    return {'young': 26, 'mid': 45, 'old': 72}.get(p['age'], 40)
+
+def bbox(o):
+    pts = [o.matrix_world @ Vector(c) for c in o.bound_box]
+    lo = Vector((min(v.x for v in pts), min(v.y for v in pts), min(v.z for v in pts)))
+    hi = Vector((max(v.x for v in pts), max(v.y for v in pts), max(v.z for v in pts)))
+    return lo, hi
+
+def tint(o, color, lift=(0.0, 0.7, 0.25, 1.15)):
+    # Farv et tekstureret materiale om, men behold teksturens lys og skygge.
+    for m in o.data.materials:
+        nt = m.node_tree
+        b = next(n for n in nt.nodes if n.bl_idname == 'ShaderNodeBsdfPrincipled')
+        sock = b.inputs['Base Color']
+        if not sock.links:
+            sock.default_value = color
+            continue
+        src = sock.links[0].from_socket
+        bw = nt.nodes.new('ShaderNodeRGBToBW')
+        mr = nt.nodes.new('ShaderNodeMapRange')
+        mr.inputs[1].default_value, mr.inputs[2].default_value = lift[0], lift[1]
+        mr.inputs[3].default_value, mr.inputs[4].default_value = lift[2], lift[3]
+        mx = nt.nodes.new('ShaderNodeMix')
+        mx.data_type = 'RGBA'
+        mx.blend_type = 'MULTIPLY'
+        mx.inputs['Factor'].default_value = 1.0
+        nt.links.new(src, bw.inputs[0])
+        nt.links.new(bw.outputs[0], mr.inputs[0])
+        nt.links.new(mr.outputs[0], mx.inputs[6])
+        mx.inputs[7].default_value = color
+        nt.links.new(mx.outputs[2], sock)
+
+def shell(body, keep, thick, m, name, noise=0.0):
+    # Et tyndt lag oven på huden (skæg, skægstubbe, rullekrave), lavet af kroppens egne flader.
+    import bmesh
+    dg = bpy.context.evaluated_depsgraph_get()
+    me = bpy.data.meshes.new_from_object(body.evaluated_get(dg))
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    mw = body.matrix_world
+    from mathutils.kdtree import KDTree
+    fade = bm.verts.layers.float.new('fade')   # 0 ved kanten, 1 et stykke inde: bløde overgange
+    out = [v for v in bm.verts if not keep(mw @ v.co)]
+    kd = KDTree(len(out))
+    for i, v in enumerate(out):
+        kd.insert(mw @ v.co, i)
+    kd.balance()
+    for v in bm.verts:
+        d = kd.find(mw @ v.co)[2] if out else 1.0
+        v[fade] = min(1.0, (d or 0.0) / 0.007)
+    bmesh.ops.delete(bm, geom=out, context='VERTS')
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.clear()
+    me.materials.append(m)
+    o = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(o)
+    o.matrix_world = mw
+    sm = o.modifiers.new('sub', 'SUBSURF')
+    sm.levels = sm.render_levels = 1
+    so = o.modifiers.new('tyk', 'SOLIDIFY')
+    so.thickness = thick
+    so.offset = 1
+    if noise:
+        tex = bpy.data.textures.new(name, 'CLOUDS')
+        tex.noise_scale = 0.004
+        dm = o.modifiers.new('ujævn', 'DISPLACE')
+        dm.texture = tex
+        dm.strength = noise
+        dm.mid_level = 0.5
+    me.shade_smooth()
+    return o
+
+def hairmat(color, density, scale, name):
+    # Hår/skæg-materiale: små tætte prikker og streger, der lader huden skinne igennem.
+    m = bpy.data.materials.new(name)
+    nt = m.node_tree
+    b = nt.nodes['Principled BSDF']
+    b.inputs['Base Color'].default_value = color
+    b.inputs['Roughness'].default_value = 0.7
+    b.inputs['Specular IOR Level'].default_value = 0.3
+    tc = nt.nodes.new('ShaderNodeTexCoord')
+    n = nt.nodes.new('ShaderNodeTexNoise')
+    n.inputs['Scale'].default_value = scale
+    nt.links.new(tc.outputs['Object'], n.inputs['Vector'])
+    n.inputs['Detail'].default_value = 8
+    v = nt.nodes.new('ShaderNodeTexVoronoi')
+    v.inputs['Scale'].default_value = scale * 2.2
+    nt.links.new(tc.outputs['Object'], v.inputs['Vector'])
+    mul = nt.nodes.new('ShaderNodeMath')
+    mul.operation = 'MULTIPLY'
+    nt.links.new(n.outputs['Fac'], mul.inputs[0])
+    nt.links.new(v.outputs['Distance'], mul.inputs[1])
+    ramp = nt.nodes.new('ShaderNodeValToRGB')
+    t = 0.04 + density * 0.3
+    ramp.color_ramp.elements[0].position = t
+    ramp.color_ramp.elements[1].position = t + 0.03
+    ramp.color_ramp.elements[0].color = (1, 1, 1, 1)
+    ramp.color_ramp.elements[1].color = (0, 0, 0, 1)
+    nt.links.new(mul.outputs[0], ramp.inputs[0])
+    at = nt.nodes.new('ShaderNodeAttribute')
+    at.attribute_name = 'fade'
+    sm = nt.nodes.new('ShaderNodeMath')
+    sm.operation = 'POWER'
+    sm.inputs[1].default_value = 0.7
+    nt.links.new(at.outputs['Fac'], sm.inputs[0])
+    am = nt.nodes.new('ShaderNodeMath')
+    am.operation = 'MULTIPLY'
+    nt.links.new(ramp.outputs[0], am.inputs[0])
+    nt.links.new(sm.outputs[0], am.inputs[1])
+    nt.links.new(am.outputs[0], b.inputs['Alpha'])
+    bump = nt.nodes.new('ShaderNodeBump')
+    bump.inputs['Strength'].default_value = 0.6
+    nt.links.new(mul.outputs[0], bump.inputs['Height'])
+    nt.links.new(bump.outputs['Normal'], b.inputs['Normal'])
+    return m
+
 def portrait(p):
     fresh(360, 450, True)
-    rnd = random.Random(p['key'])
+    HS, AS = mh()
     f = p['sex'] == 'f'
-    old, young = p['age'] == 'old', p['age'] == 'young'
-    skin = lin(p['skin'])
-    if old:
-        skin = mix(skin, lin('#c9b3a4'), 0.18)
-    sk = mat(skin, 0.55, sss=0.25)
-    hair = mat(lin(p['hc']), 0.75, spec=0.35)
-    shirt = mat(lin(p['shirt']), 0.85, spec=0.2)
-    hw = 0.86 if f else 0.92          # hovedets bredde
-    hz = 1.62                          # hovedets midte
-    # Krop og hals
-    sphere((0, 0.05, 0.25), (1.55 if not f else 1.4, 0.72, 0.95), shirt)
-    cyl((0, 0.02, 1.02), 0.3 if f else 0.34, 0.7, sk)
-    # Krave
-    if p['collar'] == 'turtle':
-        cyl((0, 0.02, 1.0), 0.4, 0.5, shirt, scale=(1, 0.95, 1))
-        torus((0, 0.02, 1.24), 0.34, 0.07, shirt)
-    elif p['collar'] == 'shirt':
-        white = mat(lin('#f1ede4'), 0.7)
-        for sgn in (-1, 1):
-            box((0.17 * sgn, -0.3, 1.0), (0.32, 0.05, 0.22), white, rot=(math.radians(-25), 0, math.radians(32 * sgn)), bevel=0.015)
-        torus((0, 0.02, 0.9), 0.36, 0.05, white, scale=(1, 0.9, 1))
-    elif p['collar'] == 'round':
-        torus((0, 0.03, 0.86), 0.38, 0.06, shirt, scale=(1, 0.9, 1))
-    else:  # v-hals
-        torus((0, 0.03, 0.86), 0.38, 0.05, shirt, scale=(1, 0.9, 0.6))
-    # Hoved, ører, næse
-    sphere((0, 0, hz), (hw, 0.96, 1.1 if f else 1.14), sk, sub=1)
-    sphere((0, -0.32, hz - 0.62), (0.52 if f else 0.6, 0.5, 0.35), sk)      # kæbe
-    for sgn in (-1, 1):
-        sphere((sgn * (hw + 0.02), 0.05, hz - 0.02), (0.11, 0.07, 0.2), sk)
-    sphere((0, -0.95, hz - 0.12), (0.11, 0.13, 0.17), sk)
-    sphere((0, -0.9, hz - 0.27), (0.15, 0.1, 0.07), sk)
-    # Øjne
-    white = mat(lin('#f4f1ec'), 0.25)
-    iris = mat(lin(rnd.choice(['#3d2b1f', '#4a6378', '#4f5d3a', '#2a211c'])), 0.2, coat=1)
-    for sgn in (-1, 1):
-        x = sgn * 0.3
-        sphere((x, -0.78, hz + 0.08), (0.13, 0.08, 0.1), white, sub=0)
-        sphere((x, -0.855, hz + 0.08), (0.065, 0.03, 0.065), iris, sub=0)
-        lid = sphere((x, -0.74, hz + 0.15), (0.16, 0.1, 0.06), sk, sub=0)
-        brow_c = mat(lin('#5a4636'), 0.8) if p['hair'] == 'bald' else hair
-        box((x, -0.82, hz + 0.3), (0.3, 0.06, 0.05 if f else 0.07), brow_c, rot=(0, math.radians(-8 * sgn), 0), bevel=0.02, smooth=True)
-        if old:
-            torus((x, -0.8, hz - 0.04), 0.1, 0.012, mat(mix(skin, lin('#6b4a3a'), 0.25), 0.7), rot=(math.radians(80), 0, 0), scale=(1.3, 1, 0.5))
-    # Mund
-    lip = mat(lin('#a85a55') if f else mix(skin, lin('#8a4a40'), 0.45), 0.4)
-    sphere((0, -0.84, hz - 0.5), (0.2 if f else 0.22, 0.06, 0.045 if f else 0.03), lip, sub=0)
-    # Hår
-    hb = (hw + 0.06)
-    if p['hair'] in ('short', 'curly', 'bun', 'bob', 'long'):
-        if p['hair'] == 'curly':
-            for i in range(40):
-                a = rnd.uniform(0, math.tau); b = rnd.uniform(0.15, 1.15)
-                v = Vector((math.cos(a) * math.sin(b) * hb, math.sin(a) * math.sin(b) * 0.98 + 0.08, math.cos(b) * 1.1))
-                if v.y < -0.55 and v.z < 0.7:
-                    continue
-                sphere((v.x, v.y, hz + 0.12 + v.z), (0.24, 0.24, 0.24), hair, seg=16, sub=0)
-        else:
-            cap = sphere((0, 0.1, hz + 0.24), (hb, 1.0, 0.98 if p['hair'] != 'short' else 0.92), hair, sub=1)
-            sphere((0, -0.52, hz + 0.62), (hw * 0.95, 0.45, 0.3), hair, sub=1)     # pandehår/forkant
-        if p['hair'] == 'bun':
-            sphere((0, 0.45, hz + 1.05), (0.32, 0.32, 0.3), hair)
-        if p['hair'] in ('bob', 'long'):
-            low = hz - (0.45 if p['hair'] == 'bob' else 1.2)
-            for sgn in (-1, 1):
-                sphere((sgn * (hw + 0.02), 0.12, (hz + low) / 2 + 0.2), (0.22, 0.6, (hz - low) / 2 + 0.35), hair)
-            sphere((0, 0.42, (hz + low) / 2 + 0.2), (hw + 0.1, 0.5, (hz - low) / 2 + 0.45), hair)
-    elif p['hair'] == 'bald':
-        for sgn in (-1, 1):
-            sphere((sgn * (hw - 0.04), 0.25, hz + 0.05), (0.14, 0.45, 0.22), hair)
-        sphere((0, 0.55, hz + 0.05), (hw * 0.8, 0.2, 0.22), hair)
-    # Skæg
+    age = years(p)
+    agev = 0.5 * age / 25 if age < 25 else 0.5 + (age - 25) / 65 * 0.5
+    sk = SKIN_IDX.get(p['skin'], 1)
+    rc = RACE[sk]
+    rnd = random.Random(p['key'])
+    macro = {'gender': 1.0 if f else 0.0, 'age': agev, 'muscle': rnd.uniform(0.4, 0.6), 'weight': rnd.uniform(0.4, 0.65) + (0.08 if age > 50 else 0),
+             'proportions': 0.5, 'height': 0.5, 'cupsize': 0.5, 'firmness': 0.5,
+             'race': {'caucasian': rc[0], 'asian': rc[1], 'african': rc[2]}}
+    h = HS.create_human(macro_detail_dict=macro)
+    face_targets(h, rnd, f, age)
+    grp = 'young' if age < 32 else 'middleage' if age < 56 else 'old'
+    HS.set_character_skin(AS.find_asset_absolute_path('%s_%s_%s.mhmat' % (grp, ETH[sk], 'female' if f else 'male'), asset_subdir='skins'), h)
+    add = lambda sub, fn, t: HS.add_mhclo_asset(AS.find_asset_absolute_path(fn, asset_subdir=sub), h, asset_type=t, set_up_rigging=False)
+    eyes = add('eyes', 'low-poly.mhclo', 'Eyes')
+    add('eyebrows', 'eyebrow%03d.mhclo' % (rnd.choice([1, 2, 3, 6, 7, 10]) if f else rnd.choice([1, 4, 5, 8, 9, 11, 12])), 'Eyebrows')
+    add('eyelashes', 'eyelashes0%d.mhclo' % (rnd.choice([1, 2]) if f else 3), 'Eyelashes')
+    teeth = add('teeth', 'teeth_base.mhclo', 'Teeth')
+    hc = lin(p['hc'])
+    for o in bpy.data.objects:
+        if 'eyebrow' in o.name.lower():
+            tint(o, mix(hc, (0.05, 0.04, 0.03, 1), 0.35 if p['hair'] != 'bald' else 0.6))
+    if p['hair'] in HAIR:
+        hair = add('hair', HAIR[p['hair']][1 if f else 0] + '.mhclo', 'Hair')
+        tint(hair, hc)
+    cl = p['collar']
+    suit = {'shirt': 'female_elegantsuit01' if f else 'male_casualsuit01', 'v': 'female_elegantsuit01' if f else 'male_casualsuit03'}.get(cl, 'male_casualsuit06')
+    cloth = add('clothes', suit + '.mhclo', 'Clothes')
+    tint(cloth, lin(p['shirt']), lift=(0.0, 1.0, 0.82, 0.98))
+    # Mål på ansigtet
+    elo, ehi = bbox(eyes)
+    ec = (elo + ehi) / 2
+    er = (ehi.y - elo.y) / 2
+    hs = (ehi.x - elo.x) / 0.0869          # hovedets størrelse i forhold til standardmodellen
+    mz = ec.z - 0.075 * hs                 # munden
+    cb = ec.z - 0.108 * hs                 # hagens underkant
+    front = elo.y
+    if cl == 'turtle':
+        shell(h, lambda v: cb - 0.13 < v.z < cb - 0.012 and not (v.z > cb - 0.035 and v.y < ec.y + 0.045), 0.012,
+              mat(lin(p['shirt']), 0.9, spec=0.2), 'rullekrave', noise=0.002)
+    hcol = mix(hc, (0.02, 0.015, 0.01, 1), 0.25)
+    lips = lambda v: abs(v.x) < 0.022 and mz - 0.009 < v.z < mz + 0.006
+    face = lambda v: v.y < ec.y + 0.07 and abs(v.x) < 0.078
+    jaw = lambda v, low: v.z > cb - low and (v.y < ec.y + 0.03 or v.z > cb + 0.012)
     if p['beard'] == 'full':
-        sphere((0, -0.3, hz - 0.62), (0.68, 0.62, 0.45), hair, sub=1)
-        for sgn in (-1, 1):
-            sphere((sgn * 0.62, -0.1, hz - 0.3), (0.2, 0.4, 0.38), hair)
-        sphere((0, -0.86, hz - 0.36), (0.28, 0.08, 0.07), hair)
-        sphere((0, -0.86, hz - 0.5), (0.2 if f else 0.22, 0.06, 0.03), lip, sub=0)
+        shell(h, lambda v: face(v) and jaw(v, 0.014) and v.z < ec.z - 0.045 and not lips(v) and (abs(v.x) > 0.03 or v.z < mz + 0.022),
+              0.007, hairmat(hcol, 0.9, 900, 'skæg'), 'skæg', noise=0.003)
     elif p['beard'] == 'stubble':
-        st = mat(mix(skin, lin(p['hc']), 0.55), 0.95, spec=0.1, alpha=0.75)
-        sphere((0, -0.31, hz - 0.62), (0.53 if f else 0.61, 0.51, 0.36), st)
+        shell(h, lambda v: face(v) and jaw(v, 0.008) and v.z < ec.z - 0.05 and not lips(v) and (abs(v.x) > 0.03 or v.z < mz + 0.02),
+              0.0012, hairmat(mix(hcol, (0.02, 0.015, 0.01, 1), 0.55), 0.55, 3800, 'stubbe'), 'stubbe')
     elif p['beard'] == 'moustache':
-        sphere((0, -0.9, hz - 0.37), (0.26, 0.08, 0.06), hair)
-    # Briller og øreringe
+        shell(h, lambda v: face(v) and abs(v.x) < 0.032 and mz + 0.006 < v.z < mz + 0.022, 0.004, hairmat(hcol, 0.95, 900, 'overskæg'), 'overskæg')
     if p['glasses']:
-        frame = mat(lin('#2a2420'), 0.3, coat=0.6)
+        frame = mat(lin(rnd.choice(['#1d1a18', '#3a2a1f', '#2b2b30', '#6b5a4a'])), 0.3, coat=0.8)
+        glass = mat((0.85, 0.9, 0.92, 1), 0.02, coat=1, alpha=0.08)
+        hx = (ehi.x - elo.x) / 2 - er
+        y = front - 0.012
         for sgn in (-1, 1):
-            torus((sgn * 0.3, -0.92, hz + 0.08), 0.19, 0.025, frame, rot=(math.radians(90), 0, 0))
-            cyl((sgn * 0.7, -0.45, hz + 0.12), 0.02, 0.85, frame, rot=(math.radians(90), 0, math.radians(-6 * sgn)))
-        cyl((0, -0.95, hz + 0.12), 0.02, 0.2, frame, rot=(0, math.radians(90), 0))
+            torus((sgn * hx, y, ec.z), 0.021, 0.0018, frame, rot=(math.radians(90), 0, 0), scale=(1.15, 1, 0.85))
+            cyl((sgn * hx, y + 0.001, ec.z), 0.021, 0.001, glass, rot=(math.radians(90), 0, 0), scale=(1.15, 0.85, 1))
+            cyl((sgn * (hx + 0.026), y + 0.05, ec.z + 0.006), 0.0015, 0.1, frame, rot=(math.radians(90), 0, 0))
+        cyl((0, y, ec.z + 0.004), 0.0016, 2 * hx - 0.046, frame, rot=(0, math.radians(90), 0))
     if p['earrings']:
-        gold = mat(lin('#d7b350'), 0.25, metal=1)
+        gold = mat(lin('#d7b350'), 0.2, metal=1)
+        mw = h.matrix_world
+        ev = h.evaluated_get(bpy.context.evaluated_depsgraph_get()).to_mesh()
+        side = [mw @ v.co for v in ev.vertices]
         for sgn in (-1, 1):
-            sphere((sgn * (hw + 0.04), -0.02, hz - 0.24), (0.05, 0.05, 0.05), gold, seg=16, sub=0)
-    # Lys og kamera
-    world(lin('#8c8070'), 0.35)
-    area((-2.6, -3.2, 3.6), (0, 0, hz), 520, 2.2, (1, 0.95, 0.88))
-    area((3.0, -2.6, 1.8), (0, 0, hz), 160, 3.0, (0.85, 0.9, 1))
-    area((0.5, 3.0, 3.4), (0, 0, hz + 0.4), 380, 1.5)
-    camera((0, -9.5, hz - 0.2), (0, 0, hz - 0.28), lens=72)
+            cand = [v for v in side if abs(v.z - (mz + 0.005)) < 0.008 and ec.y + 0.02 < v.y < ec.y + 0.11 and v.x * sgn > 0]
+            if cand:
+                ear = max(cand, key=lambda v: v.x * sgn)
+                sphere((ear.x - sgn * 0.004, ear.y, ear.z - 0.012), (0.0035, 0.0035, 0.0035), gold, seg=16, sub=0)
+    # Lys og kamera (pasfoto)
+    world(lin('#8c8478'), 0.25)
+    tgt = Vector((0, ec.y, ec.z - 0.1))
+    area((-1.0, ec.y - 0.75, ec.z + 0.5), tgt, 46, 0.6, (1, 0.94, 0.86))
+    area((0.9, ec.y - 0.6, ec.z), tgt, 6, 1.2, (0.86, 0.9, 1))
+    area((0.25, ec.y + 0.8, ec.z + 0.55), tgt, 30, 0.5)
+    cam = camera((0, ec.y - 1.7, ec.z - 0.02), tgt, lens=85)
+    cam.data.sensor_fit = 'VERTICAL'
+    cam.data.sensor_height = 24
     return shoot('p-' + p['key'])
 
 # ── Gerningsstedsfoto (set oppefra; 1 enhed = 100 punkter i 320×200-billedet) ──
 def to_world(x, y):
     return (x / 100 - 1.6, 1.0 - y / 100)
 
+def woodmat(a, b, seed, rough=0.55):
+    # Træ: årer (bølgetekstur forvredet af støj) mellem planke-farverne a og b.
+    m = bpy.data.materials.new('træ%d' % seed)
+    nt = m.node_tree
+    bs = nt.nodes['Principled BSDF']
+    tc = nt.nodes.new('ShaderNodeTexCoord')
+    mp = nt.nodes.new('ShaderNodeMapping')
+    mp.inputs['Location'].default_value = (seed * 3.7, seed * 1.3, 0)
+    mp.inputs['Scale'].default_value = (0.25, 1, 1)
+    wv = nt.nodes.new('ShaderNodeTexWave')
+    wv.bands_direction = 'Y'
+    wv.inputs['Scale'].default_value = 4
+    wv.inputs['Distortion'].default_value = 7
+    wv.inputs['Detail'].default_value = 4
+    wv.inputs['Detail Scale'].default_value = 1.2
+    ns = nt.nodes.new('ShaderNodeTexNoise')
+    ns.inputs['Scale'].default_value = 40
+    ramp = nt.nodes.new('ShaderNodeValToRGB')
+    ramp.color_ramp.elements[0].color = a
+    ramp.color_ramp.elements[1].color = b
+    mixn = nt.nodes.new('ShaderNodeMath')
+    mixn.operation = 'MULTIPLY_ADD'
+    mixn.inputs[1].default_value = 0.85
+    nt.links.new(tc.outputs['Object'], mp.inputs['Vector'])
+    nt.links.new(mp.outputs['Vector'], wv.inputs['Vector'])
+    nt.links.new(tc.outputs['Object'], ns.inputs['Vector'])
+    nt.links.new(wv.outputs['Fac'], mixn.inputs[0])
+    nt.links.new(ns.outputs['Fac'], mixn.inputs[2])
+    nt.links.new(mixn.outputs[0], ramp.inputs['Fac'])
+    nt.links.new(ramp.outputs['Color'], bs.inputs['Base Color'])
+    bump = nt.nodes.new('ShaderNodeBump')
+    bump.inputs['Strength'].default_value = 0.25
+    nt.links.new(mixn.outputs[0], bump.inputs['Height'])
+    nt.links.new(bump.outputs['Normal'], bs.inputs['Normal'])
+    bs.inputs['Roughness'].default_value = rough
+    bs.inputs['Specular IOR Level'].default_value = 0.35
+    return m
+
 def floor(job):
     a, b = lin(job['colors'][0]), lin(job['colors'][1])
     bg, rnd = job['bg'], random.Random(job['key'])
     if bg in ('wood', 'deck'):
         w = 0.24
+        dark = mix(b, (0, 0, 0, 1), 0.35)
         for i in range(10):
-            c = mix(a, b, rnd.uniform(0, 0.8))
             off = rnd.uniform(-1, 1)
             for seg in (-1, 1):
-                box((seg * 1.2 + off * 0.4, 1.1 - i * w, -0.03), (2.38, w - 0.012, 0.06), mat(c, 0.55 if bg == 'deck' else 0.45, coat=0.2), bevel=0.006)
-        box((0, 0, -0.08), (6, 4, 0.04), mat(mix(b, (0, 0, 0, 1), 0.6), 0.9))
+                sh = rnd.uniform(-0.12, 0.08)
+                ca, cb = mix(a, (0, 0, 0, 1), -sh if sh < 0 else 0), mix(dark, b, 0.5 + sh)
+                box((seg * 1.2 + off * 0.4, 1.1 - i * w, -0.03), (2.38, w - 0.01, 0.06), woodmat(ca, cb, rnd.randint(0, 999), 0.62 if bg == 'deck' else 0.45), bevel=0.006)
+        box((0, 0, -0.08), (6, 4, 0.04), mat(mix(b, (0, 0, 0, 1), 0.75), 0.9))
     elif bg == 'tile':
         for i in range(-1, 9):
             for j in range(-1, 6):
@@ -278,37 +467,137 @@ def floor(job):
         for _ in range(160):
             sphere((rnd.uniform(-2, 2), rnd.uniform(-1.4, 1.4), 0), (0.02, 0.02, 0.008), mat(b, 0.9), seg=8, sub=0)
 
+def decal(loc, size, rot, img_path, color, rough, name, gloss=False):
+    # Et fladt "aftryk" på gulvet ud fra et gråtonebillede (hvid = synligt).
+    bpy.ops.mesh.primitive_plane_add(location=loc, rotation=(0, 0, rot))
+    o = bpy.context.object
+    o.scale = (size[0] / 2, size[1] / 2, 1)
+    m = bpy.data.materials.new(name)
+    nt = m.node_tree
+    bs = nt.nodes['Principled BSDF']
+    tx = nt.nodes.new('ShaderNodeTexImage')
+    tx.image = bpy.data.images.load(img_path)
+    tx.image.colorspace_settings.name = 'Non-Color'
+    tx.extension = 'CLIP'
+    nt.links.new(tx.outputs['Color'], bs.inputs['Alpha'])
+    bs.inputs['Base Color'].default_value = color
+    bs.inputs['Roughness'].default_value = rough
+    if gloss:
+        bs.inputs['Coat Weight'].default_value = 1
+        bs.inputs['Coat Roughness'].default_value = 0.02
+        bump = nt.nodes.new('ShaderNodeBump')
+        bump.inputs['Strength'].default_value = 0.4
+        nt.links.new(tx.outputs['Color'], bump.inputs['Height'])
+        nt.links.new(bump.outputs['Normal'], bs.inputs['Coat Normal'])
+    o.data.materials.append(m)
+    return o
+
+def stain_img(seed):
+    # Uregelmæssig pøl: bløde klatter + støj, tegnet med Pillow.
+    from PIL import Image, ImageDraw, ImageFilter
+    rnd = random.Random(seed)
+    im = Image.new('L', (512, 512), 0)
+    d = ImageDraw.Draw(im)
+    for _ in range(14):
+        x, y, r = rnd.gauss(256, 60), rnd.gauss(256, 55), rnd.uniform(40, 110)
+        d.ellipse((x - r, y - r * rnd.uniform(0.6, 1), x + r, y + r * rnd.uniform(0.6, 1)), fill=255)
+    for _ in range(26):  # små stænk
+        x, y, r = rnd.gauss(256, 140), rnd.gauss(256, 130), rnd.uniform(3, 12)
+        d.ellipse((x - r, y - r, x + r, y + r), fill=255)
+    im = im.filter(ImageFilter.GaussianBlur(9)).point(lambda v: min(255, int(v * 1.25)))
+    path = os.path.join(CACHE, 'pøl-%s.png' % seed)
+    im.save(path)
+    return path
+
+def sole_img():
+    # Skoaftryk: sål med tværriller og hæl, som efterlades i olie.
+    from PIL import Image, ImageDraw, ImageFilter
+    path = os.path.join(CACHE, 'sål.png')
+    if os.path.exists(path):
+        return path
+    W, H = 256, 640
+    mask = Image.new('L', (W, H), 0)
+    d = ImageDraw.Draw(mask)
+    d.ellipse((30, 20, 226, 300), fill=255)        # forfod
+    d.polygon([(40, 170), (216, 170), (190, 420), (70, 420)], fill=255)
+    d.ellipse((62, 400, 196, 620), fill=255)       # hæl
+    tread = Image.new('L', (W, H), 0)
+    t = ImageDraw.Draw(tread)
+    for y in range(24, 640, 22):
+        t.rectangle((0, y, W, y + 11), fill=255)
+    rnd = random.Random(7)
+    for _ in range(300):
+        x, y = rnd.uniform(0, W), rnd.uniform(0, H)
+        t.ellipse((x - 4, y - 4, x + 4, y + 4), fill=0)
+    from PIL import ImageChops
+    gap = Image.new('L', (W, H), 0)
+    ImageDraw.Draw(gap).rectangle((0, 425, W, 445), fill=255)
+    out = ImageChops.multiply(mask, tread)
+    out = ImageChops.subtract(out, gap)
+    out.filter(ImageFilter.GaussianBlur(1.5)).save(path)
+    return path
+
+def shoe_obj(color):
+    # En rigtig sko fra MakeHuman (CC0), lagt på siden.
+    HS, AS = mh()
+    path = AS.find_asset_absolute_path('shoes01.obj', asset_subdir='clothes')
+    bpy.ops.wm.obj_import(filepath=path)
+    o = bpy.context.selected_objects[0]
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode='OBJECT')
+    zs = [v.co.z for v in o.data.vertices]
+    top = min(zs) + 0.4 * (max(zs) - min(zs))     # fjern sokken over skoen
+    for v in o.data.vertices:
+        v.select = v.co.x < 0 or v.co.z > top
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.delete(type='VERT')
+    bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='BOUNDS')
+    d = os.path.dirname(path)
+    m = bpy.data.materials.new('sko')
+    nt = m.node_tree
+    bs = nt.nodes['Principled BSDF']
+    tx = nt.nodes.new('ShaderNodeTexImage')
+    tx.image = bpy.data.images.load(os.path.join(d, 'shoes01_diffuse.png'))
+    nm = nt.nodes.new('ShaderNodeTexImage')
+    nm.image = bpy.data.images.load(os.path.join(d, 'shoes01_normal.png'))
+    nm.image.colorspace_settings.name = 'Non-Color'
+    nmap = nt.nodes.new('ShaderNodeNormalMap')
+    nt.links.new(nm.outputs['Color'], nmap.inputs['Color'])
+    nt.links.new(nmap.outputs['Normal'], bs.inputs['Normal'])
+    bs.inputs['Coat Weight'].default_value = 0.4
+    bs.inputs['Roughness'].default_value = 0.45
+    o.data.materials.clear()
+    o.data.materials.append(m)
+    nt.links.new(tx.outputs['Color'], bs.inputs['Base Color'])
+    if color:
+        tint(o, lin(color), lift=(0.0, 0.8, 0.3, 1.1))
+    return o
+
 def item(name, x, y, s, r, c):
     wx, wy = to_world(x, y)
     k = s * 0.4 / 40            # ikonets enhed (40 punkter) i verdens-enheder
     rot = math.radians(-(r or 0))
-    rnd = random.Random('%s%s%s' % (name, x, y))
-    made = []
-    def at(px, py):             # punkt i ikonets 40×40-koordinater
-        dx, dy = (px - 20) * k, -(py - 20) * k
-        return (wx + dx * math.cos(rot) - dy * math.sin(rot), wy + dx * math.sin(rot) + dy * math.cos(rot))
     if name == 'stain':
-        m = mat(lin(c or '#6e1a1a'), 0.08, coat=1, spec=0.8)
-        for _ in range(9):
-            px, py = rnd.uniform(9, 31), rnd.uniform(10, 30)
-            made.append(sphere((*at(px, py), 0.0), (rnd.uniform(5, 9) * k, rnd.uniform(4, 8) * k, 0.006), m, rot=(0, 0, rnd.uniform(0, 6)), sub=1))
+        decal((wx, wy, 0.001), (30 * k, 30 * k), rot, stain_img('%d%d' % (x, y)), mix(lin(c or '#6e1a1a'), (0, 0, 0, 1), 0.75), 0.3, 'pøl', gloss=True)
     elif name == 'footprint':
-        m = mat(lin(c or '#4a3a2a'), 0.7, alpha=0.85)
-        made.append(sphere((*at(19, 23), 0.001), (6.5 * k, 13 * k, 0.003), m, rot=(0, 0, rot + 0.15), sub=1))
-        for px, py, rr in ((13, 5, 2.4), (18, 3, 2.2), (23, 4, 2), (27, 6, 1.8)):
-            made.append(sphere((*at(px, py), 0.001), (rr * k, rr * k, 0.003), m, sub=0))
+        decal((wx, wy, 0.0015), (13 * k, 33 * k), rot + math.radians(8), sole_img(), lin(c or '#4a3a2a'), 0.35, 'aftryk', gloss=True)
     elif name == 'shoe':
-        leather = mat(lin(c or '#3a2a20'), 0.35, coat=0.6)
-        sole = mat(lin('#1a1715'), 0.8)
-        L = 32 * k
-        cx, cy = at(20, 24)
-        made.append(sphere((cx, cy, 0.06 * s / 1.4), (L / 2, 7 * k, 0.07 * s / 1.4), leather, rot=(0, 0, rot), sub=1))
-        made.append(sphere((*at(10, 22), 0.1 * s / 1.4), (6 * k, 6 * k, 0.07 * s / 1.4), leather, rot=(0, 0, rot), sub=1))
-        made.append(box((cx, cy, 0.012), (L * 1.02, 15 * k, 0.025), sole, rot=(0, 0, rot), bevel=0.01))
-        made.append(torus((*at(10, 22), 0.16 * s / 1.4), 3.5 * k, 0.9 * k, mat(lin('#0e0c0b'), 0.6)))
+        o = shoe_obj(c)
+        L = max(o.dimensions)
+        f = 34 * k / L
+        o.scale = (f, f, f)
+        o.rotation_euler = (0, math.radians(90), rot + math.radians(90))
+        bpy.context.view_layer.update()
+        o.location = (wx, wy, 0)
+        bpy.context.view_layer.update()
+        lo = min((o.matrix_world @ Vector(cc)).z for cc in o.bound_box)
+        o.location.z -= lo
     else:  # ukendt genstand: en lille bevispose
-        made.append(box((wx, wy, 0.01), (22 * k, 28 * k, 0.012), mat(lin('#e9e4d4'), 0.3, coat=0.4, alpha=0.9), rot=(0, 0, rot), bevel=0.004))
-    return made
+        box((wx, wy, 0.01), (22 * k, 28 * k, 0.012), mat(lin('#e9e4d4'), 0.3, coat=0.4, alpha=0.9), rot=(0, 0, rot), bevel=0.004)
 
 def photo(job):
     fresh(960, 600, False)
@@ -317,9 +606,9 @@ def photo(job):
         n, x, y = it[0], it[1], it[2]
         s = it[3] if len(it) > 3 and it[3] else 1.4
         item(n, x, y, s, it[4] if len(it) > 4 else 0, it[5] if len(it) > 5 else None)
-    world(lin('#2a2a2a'), 0.25)
-    area((0.3, -0.6, 4.5), (0, 0, 0), 900, 0.6, (1, 0.97, 0.92))     # blitz ved kameraet
-    area((-3, 2, 2.5), (0, 0, 0), 250, 3, (0.8, 0.85, 1))
+    world(lin('#b8b4ac'), 0.35)
+    area((-1.2, -1.6, 3.2), (0, 0, 0), 380, 1.6, (1, 0.96, 0.9))     # blitz skråt fra kameraet
+    area((2.5, 1.5, 2.5), (0, 0, 0), 90, 3, (0.8, 0.85, 1))
     camera((0, 0, 6), (0, 0, 0), ortho=3.2)
     return shoot('ph-' + job['key'])
 
@@ -356,26 +645,45 @@ def cctv(job):
     camera((0, 0, hc), (0, 1, hc), lens=lens, shift=(0, -56.7 / 320))
     return shoot('cc-' + job['key'])
 
-# ── Figur til overvågning (gennemsigtig, fødder nederst i billedet) ────────────
+# ── Figur til overvågning: et helt MakeHuman-menneske, set fra kameraets vinkel ──
+OUTFIT = [(('kedeldragt', 'overall', 'arbejdstøj', 'dragt'), 'male_worksuit01'), (('uniform', 'skjorte'), 'male_casualsuit01'),
+          (('jakke', 'frakke', 'regnjakke', 'blazer'), 'male_casualsuit05'), (('jakkesæt', 'habit'), 'male_elegantsuit01'),
+          (('kjole', 'nederdel', 'bluse'), 'female_elegantsuit01'), (('trøje', 'sweater', 'hættetrøje', 'strik'), 'male_casualsuit02')]
+
+def arms_down(rig):
+    for sgn, side in ((1, 'L'), (-1, 'R')):
+        pb = rig.pose.bones.get('upperarm01.' + side)
+        if not pb:
+            continue
+        b = pb.bone
+        v = (b.tail_local - b.head_local).normalized()
+        q = v.rotation_difference(Vector((sgn * 0.12, 0.04, -1)).normalized())
+        r0 = b.matrix_local.to_quaternion()
+        pb.rotation_mode = 'QUATERNION'
+        pb.rotation_quaternion = r0.inverted() @ q @ r0
+
 def fig(job):
     fresh(120, 324, True)
-    cloth = mat(lin(job['color']), 0.85, spec=0.2)
-    dark = mat(lin('#222222'), 0.7)
-    skin = mat(lin('#c9a17f'), 0.6)
-    for sgn in (-1, 1):
-        cyl((sgn * 0.12, 0, 0.45), 0.09, 0.9, dark)
-        sphere((sgn * 0.12, -0.06, 0.04), (0.1, 0.16, 0.06), mat(lin('#111111'), 0.5), sub=0)
-        cyl((sgn * 0.3, 0, 1.12), 0.07, 0.62, cloth, rot=(0, math.radians(-8 * sgn), 0))
-        sphere((sgn * 0.33, 0, 0.78), (0.07, 0.07, 0.08), skin, sub=0)
-    sphere((0, 0, 1.18), (0.3, 0.19, 0.42), cloth)
-    sphere((0, 0, 0.9), (0.26, 0.17, 0.12), cloth)
-    sphere((0, 0, 1.62), (0.13, 0.15, 0.16), skin)
-    sphere((0, 0.03, 1.69), (0.14, 0.155, 0.12), mat(lin('#2a2420'), 0.8))
-    world(lin('#8a9590'), 0.6)
-    area((0, -3, 4), (0, 0, 1), 400, 2, (0.9, 1, 0.95))
-    # Samme vinkel som overvågningskameraet (ca. 17° ned)
-    cam = camera((0, -9.0, 1.85 + 9.0 * 0.3), (0, 0, 0.85), ortho=None, lens=120)
-    cam.data.sensor_fit = 'VERTICAL'
+    HS, AS = mh()
+    rnd = random.Random(job['key'])
+    label = job.get('label', '').lower()
+    female = any(w in label for w in ('kjole', 'nederdel', 'bluse'))
+    h = HS.create_human(macro_detail_dict={'gender': 1.0 if female else 0.0, 'age': 0.6, 'muscle': 0.5, 'weight': rnd.uniform(0.45, 0.6), 'proportions': 0.5,
+                                           'height': 0.5, 'cupsize': 0.5, 'firmness': 0.5, 'race': {'caucasian': 1, 'asian': 0, 'african': 0}})
+    rig = HS.add_builtin_rig(h, 'default')
+    HS.set_character_skin(AS.find_asset_absolute_path('middleage_caucasian_%s.mhmat' % ('female' if female else 'male'), asset_subdir='skins'), h)
+    add = lambda sub, fn, t: HS.add_mhclo_asset(AS.find_asset_absolute_path(fn, asset_subdir=sub), h, asset_type=t)
+    suit = next((s for words, s in OUTFIT if any(w in label for w in words)), 'male_casualsuit06')
+    cloth = add('clothes', suit + '.mhclo', 'Clothes')
+    tint(cloth, lin(job['color']), lift=(0.0, 1.0, 0.7, 1.0))
+    add('clothes', 'shoes0%d.mhclo' % rnd.choice([1, 3, 4]), 'Clothes')
+    hair = add('hair', rnd.choice(['short02', 'short04', 'short01']) + '.mhclo', 'Hair')
+    tint(hair, lin(rnd.choice(['#2a211c', '#5a3a22', '#8a6240', '#9c9a96'])))
+    arms_down(rig)
+    world(lin('#8a9590'), 0.5)
+    area((0, -3, 4), (0, 0, 1), 260, 3, (0.9, 1, 0.95))
+    area((2, 2, 3), (0, 0, 1), 120, 2)
+    cam = camera((0, -12, 0.95 + 12 * 0.3), (0, 0, 0.9), ortho=1.95)
     return shoot('f-' + job['key'])
 
 # ── Kør ──────────────────────────────────────────────────────────────────────
@@ -385,7 +693,10 @@ def main():
     man_path = os.path.join(ART, 'manifest.json')
     man = json.load(open(man_path)) if os.path.exists(man_path) else {'p': {}, 'ph': {}, 'cc': {}, 'f': {}}
     plan = [('p', jobs['portraits'], portrait), ('ph', jobs['photos'], photo), ('cc', jobs['cctv'], cctv), ('f', jobs['figs'], fig)]
+    only = ARGS[ARGS.index('--kun') + 1].split(',') if '--kun' in ARGS else None
     for kind, lst, fn in plan:
+        if only and kind not in only:
+            continue
         for j in lst:
             if not REDO and j['key'] in man[kind] and os.path.exists(os.path.join(ART, man[kind][j['key']])):
                 continue

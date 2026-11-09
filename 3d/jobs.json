@@ -125,19 +125,23 @@
  ],
  "figs": [
   {
-   "key": "d46a1f",
+   "key": "d46a1f-966588588",
+   "label": "Orange kedeldragt",
    "color": "#d46a1f"
   },
   {
-   "key": "2a4a8a",
+   "key": "2a4a8a-4265414186",
+   "label": "Blå uniform",
    "color": "#2a4a8a"
   },
   {
-   "key": "3e7b46",
+   "key": "3e7b46-858491164",
+   "label": "Grøn regnjakke",
    "color": "#3e7b46"
   },
   {
-   "key": "8a8a8a",
+   "key": "8a8a8a-1343454645",
+   "label": "Grå hættetrøje",
    "color": "#8a8a8a"
   }
  ]

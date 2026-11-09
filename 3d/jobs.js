@@ -25,7 +25,7 @@ for (const c of cases) {
     if (e.type === 'photo') jobs.photos.push({ key: String(hash(JSON.stringify({ bg: e.bg, items: e.items }))), case: c.nr, bg: e.bg || 'wood', colors: BG[e.bg] || BG.wood, items: e.items || [] });
     if (e.type === 'cctv') {
       jobs.cctv.push({ key: String(hash(JSON.stringify(e.doors || []))), case: c.nr, doors: e.doors || [] });
-      for (const [, col] of e.cast || []) if (!figSeen.has(col)) { figSeen.add(col); jobs.figs.push({ key: col.replace('#', ''), color: col }); }
+      for (const [label, col] of e.cast || []) { const key = col.replace('#', '') + '-' + hash(label); if (!figSeen.has(key)) { figSeen.add(key); jobs.figs.push({ key, label, color: col }); } }
     }
   }
 }
