@@ -302,5 +302,5 @@ const css=`
 @media(max-width:760px){.victimbox{grid-template-columns:80px 1fr}.au-cols{grid-template-columns:1fr}.au-fig{display:none}.pc-list button,.pc-list .row{grid-template-columns:1fr}.ph-screen{height:480px}}
 `;
 const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
-return {render,portrait,sketch,photo,icon,stopAudio,setLookup:f=>{LOOKUP=f;},hash};
+return {render,portrait,sketch,photo,icon,stopAudio,setLookup:f=>{LOOKUP=f;},hash,look};
 })();

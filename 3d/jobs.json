@@ -1,0 +1,144 @@
+{
+ "portraits": [
+  {
+   "key": "695487792",
+   "name": "Rasmus Kjær (48), rederidirektør",
+   "sex": "m",
+   "skin": "#f3d6bd",
+   "hair": "short",
+   "hc": "#9c9a96",
+   "beard": "stubble",
+   "glasses": false,
+   "age": "mid",
+   "shirt": "#2f3b55",
+   "earrings": false,
+   "collar": "shirt"
+  },
+  {
+   "key": "2380325247",
+   "name": "Lone Dahl, purser",
+   "sex": "f",
+   "skin": "#d6a27a",
+   "hair": "bun",
+   "hc": "#d8b56a",
+   "beard": "none",
+   "glasses": false,
+   "age": "mid",
+   "shirt": "#23395d",
+   "earrings": false,
+   "collar": "shirt"
+  },
+  {
+   "key": "314433752",
+   "name": "Mikkel Holt, maskinmester",
+   "sex": "m",
+   "skin": "#e9c19f",
+   "hair": "short",
+   "hc": "#a5482a",
+   "beard": "full",
+   "glasses": false,
+   "age": "mid",
+   "shirt": "#d46a1f",
+   "earrings": false,
+   "collar": "round"
+  },
+  {
+   "key": "1856922411",
+   "name": "Anja Bro, journalist",
+   "sex": "f",
+   "skin": "#f3d6bd",
+   "hair": "bob",
+   "hc": "#1f1a17",
+   "beard": "none",
+   "glasses": true,
+   "age": "mid",
+   "shirt": "#3e6b46",
+   "earrings": true,
+   "collar": "turtle"
+  },
+  {
+   "key": "3688860116",
+   "name": "Frank Juhl, lastbilchauffør",
+   "sex": "m",
+   "skin": "#f3d6bd",
+   "hair": "bald",
+   "hc": "#5a3a22",
+   "beard": "stubble",
+   "glasses": false,
+   "age": "old",
+   "shirt": "#6d6d72",
+   "earrings": false,
+   "collar": "round"
+  }
+ ],
+ "photos": [
+  {
+   "key": "2546827796",
+   "case": 9,
+   "bg": "deck",
+   "colors": [
+    "#9a7550",
+    "#86643f"
+   ],
+   "items": [
+    [
+     "stain",
+     90,
+     90,
+     1.6,
+     0,
+     "#2b2b2b"
+    ],
+    [
+     "shoe",
+     190,
+     100,
+     1.6,
+     10
+    ],
+    [
+     "footprint",
+     260,
+     70,
+     1.2,
+     30,
+     "#1d1d1d"
+    ]
+   ]
+  }
+ ],
+ "cctv": [
+  {
+   "key": "951896106",
+   "case": 9,
+   "doors": [
+    [
+     60,
+     "PERSONALE"
+    ],
+    [
+     250,
+     "TOILET"
+    ]
+   ]
+  }
+ ],
+ "figs": [
+  {
+   "key": "d46a1f",
+   "color": "#d46a1f"
+  },
+  {
+   "key": "2a4a8a",
+   "color": "#2a4a8a"
+  },
+  {
+   "key": "3e7b46",
+   "color": "#3e7b46"
+  },
+  {
+   "key": "8a8a8a",
+   "color": "#8a8a8a"
+  }
+ ]
+}
